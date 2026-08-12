@@ -1,0 +1,184 @@
+<?php
+
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PenilaianController;
+use Illuminate\Support\Facades\Route;
+
+use App\Http\Controllers\AlternatifController;
+use App\Http\Controllers\KriteriaController;
+use App\Http\Controllers\SmartController;
+use App\Http\Controllers\CoprasController;
+use App\Http\Controllers\RiwayatController;
+use App\Http\Controllers\KelompokAlternatifController;
+use App\Http\Controllers\DashboardController;
+
+/*
+|--------------------------------------------------------------------------
+| ROOT
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', function () {
+    return auth()->check()
+        ? redirect()->route('dashboard')
+        : redirect()->route('login');
+});
+
+/*
+|--------------------------------------------------------------------------
+| DASHBOARD
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/dashboard', [DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])
+    ->name('dashboard');
+
+/*
+|--------------------------------------------------------------------------
+| ROUTE SEMUA USER (ADMIN & PENGGUNA)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('auth')->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | RIWAYAT
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/riwayat', [RiwayatController::class, 'index'])
+        ->name('riwayat');
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROFILE
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| ROUTE KHUSUS ADMIN
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    /*
+    |--------------------------------------------------------------------------
+    | DETAIL ALTERNATIF
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/detail-alternatif/{id}',
+        [AlternatifController::class, 'detail']
+    )->name('alternatif.detail');
+
+    /*
+    |--------------------------------------------------------------------------
+    | CREATE ALTERNATIF PER DUSUN
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/alternatif/create/{kelompok_id}',
+        [AlternatifController::class, 'create']
+    )->name('alternatif.create');
+
+    /*
+    |--------------------------------------------------------------------------
+    | RESOURCE ALTERNATIF
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource('alternatif', AlternatifController::class)
+        ->except(['create', 'show']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | KELOMPOK / DUSUN
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/kelompok/create',
+        [KelompokAlternatifController::class, 'create']
+    )->name('kelompok.create');
+
+    Route::post(
+        '/kelompok/store',
+        [KelompokAlternatifController::class, 'store']
+    )->name('kelompok.store');
+
+    Route::delete(
+        '/kelompok/{id}',
+        [KelompokAlternatifController::class, 'destroy']
+    )->name('kelompok.destroy');
+
+    /*
+    |--------------------------------------------------------------------------
+    | KRITERIA
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource('kriteria', KriteriaController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | PENILAIAN
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource('penilaian', PenilaianController::class);
+
+    /*
+    |--------------------------------------------------------------------------
+    | SMART
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/smart', [SmartController::class, 'index'])
+        ->name('smart.index');
+
+    Route::get('/smart/{id}', [SmartController::class, 'show'])
+        ->name('smart.show');
+
+    Route::get('/smart/print/{id}', [SmartController::class, 'print'])
+        ->name('smart.print');
+
+    /*
+    |--------------------------------------------------------------------------
+    | COPRAS
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/copras', [CoprasController::class, 'index'])
+        ->name('copras.index');
+
+    Route::get('/copras/{id}', [CoprasController::class, 'show'])
+        ->name('copras.show');
+
+    Route::get('/copras/print/{id}', [CoprasController::class, 'print'])
+        ->name('copras.print');
+});
+
+/*
+|--------------------------------------------------------------------------
+| AUTH
+|--------------------------------------------------------------------------
+*/
+
+require __DIR__ . '/auth.php';
