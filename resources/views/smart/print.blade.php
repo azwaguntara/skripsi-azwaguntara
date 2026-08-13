@@ -73,7 +73,7 @@
         <div class="judul">
 
             <h3 class="text-center fw-bold">
-                Data Perhitungan SMART Penerima <br>
+                Data Perhitungan SMART Alternatif Penerima <br>
                 Bantuan Langsung Tunai Dana Desa <br>
                 (BLT-DD) Desa Sei Bamban
             </h3>

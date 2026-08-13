@@ -8,7 +8,7 @@
 
 <div class="card p-3 mb-4">
 
-    <form method="POST" action="{{route('penilaian.store')}}">
+    <form method="POST" action="{{ route('penilaian.store') }}">
         @csrf
 
         <div class="table-responsive">
@@ -22,7 +22,11 @@
                         <th>Alternatif</th>
 
                         @foreach($kriterias as $k)
-                            <th>{{ $k->nama }}</th>
+
+                        <th>
+                            {{ $k->nama }}
+                        </th>
+
                         @endforeach
 
                     </tr>
@@ -33,34 +37,43 @@
 
                     @foreach($alternatifs as $a)
 
-                        <tr>
+                    <tr>
 
-                            <td class="fw-semibold">
-                                {{ $a->nama }}
-                            </td>
+                        <td class="fw-semibold">
+                            {{ $a->nama }}
+                        </td>
 
-                            @foreach($kriterias as $k)
+                        @foreach($kriterias as $k)
 
-                                @php
-                                    $nilai = $penilaians
-                                        ->where('alternatif_id', $a->id)
-                                        ->where('kriteria_id', $k->id)
-                                        ->first();
-                                @endphp
+                        @php
 
-                                <td style="min-width: 120px;">
+                        /*
+                        |--------------------------------------------------------------------------
+                        | Ambil nilai secara langsung berdasarkan
+                        | kombinasi alternatif + kriteria
+                        |--------------------------------------------------------------------------
+                        */
 
-                                    <input type="number"
-                                        step="0.01"
-                                        name="nilai[{{$a->id}}][{{$k->id}}]"
-                                        class="form-control text-center"
-                                        value="{{ $nilai ? $nilai->nilai : '' }}">
+                        $key = $a->id . '-' . $k->id;
 
-                                </td>
+                        $nilai = $penilaians->get($key);
 
-                            @endforeach
+                        @endphp
 
-                        </tr>
+                        <td style="min-width: 120px;">
+
+                            <input
+                                type="number"
+                                step="0.01"
+                                name="nilai[{{ $a->id }}][{{ $k->id }}]"
+                                class="form-control text-center"
+                                value="{{ $nilai ? rtrim(rtrim(number_format($nilai->nilai, 2, '.', ''), '0'), '.') : '' }}">
+
+                        </td>
+
+                        @endforeach
+
+                    </tr>
 
                     @endforeach
 
@@ -72,8 +85,10 @@
 
         <div class="mt-3 text-end">
 
-            <button class="btn btn-primary">
+            <button type="submit" class="btn btn-primary">
+
                 Simpan Penilaian
+
             </button>
 
         </div>

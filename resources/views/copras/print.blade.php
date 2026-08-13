@@ -50,10 +50,9 @@
 
         <h4 class="text-center fw-bold mb-4">
 
-            Data Perhitungan COPRAS
-            <br>
+            Data Perhitungan COPRAS Alternatif Penerima <br>
 
-            Penerima BLT-DD Desa Sei Bamban
+            BLT-DD Desa Sei Bamban
 
         </h4>
 

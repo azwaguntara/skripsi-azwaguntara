@@ -6,33 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('penilaians', function (Blueprint $table) {
             $table->id();
 
-            $table->foreignId('alternatif_id')
-                ->constrained('alternatifs')
-                ->cascadeOnDelete();
+            $table->foreignId('alternatif_id');
 
-            $table->foreignId('kriteria_id')
-                ->constrained('kriterias')
-                ->cascadeOnDelete();
+            $table->foreignId('kriteria_id');
 
-            $table->decimal('nilai', 10, 2);
+            $table->double('nilai');
 
             $table->timestamps();
-
-            $table->unique(['alternatif_id', 'kriteria_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('penilaians');

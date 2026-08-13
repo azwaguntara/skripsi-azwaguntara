@@ -2,95 +2,97 @@
 
 @section('content')
 
-    <h4 class="mb-4 fw-bold">
-        Data Alternatif Calon Penerima Tiap Dusun
-    </h4>
+<h4 class="mb-4 fw-bold">
+    Data Alternatif Calon Penerima Tiap Dusun
+</h4>
 
-    <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+<div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
 
-        <a href="{{ route('kelompok.create') }}" class="btn btn-primary">
+    <a href="{{ route('kelompok.create') }}" class="btn btn-primary">
 
-            <i class="bi bi-plus"></i> Tambah Data
+        <i class="bi bi-plus"></i> Tambah Data
 
-        </a>
+    </a>
+
+</div>
+
+<div class="card p-3">
+
+    <div class="table-responsive">
+
+        <table class="table table-bordered table-hover">
+
+            <thead class="table-dark text-center">
+                <tr>
+                    <th>No</th>
+                    <th>Nama Dusun</th>
+                    <th>Tanggal</th>
+                    <th>Aksi</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @forelse($data as $item)
+
+                <tr>
+
+                    <td class="text-center">
+                        {{ $loop->iteration }}
+                    </td>
+
+                    <td>
+                        {{ $item->dusun }}
+                    </td>
+
+                    <td>
+                        {{ $item->tanggal }}
+                    </td>
+
+                    <td class="text-center">
+
+                        
+
+
+                        <a href="{{ route('alternatif.detail', $item->id) }}" class="btn btn-info btn-sm">
+
+                            <i class="bi bi-plus"></i>
+                            <span class="d-none d-md-inline">Calon Penerima</span>
+
+                        </a>
+
+                        <form action="{{ route('kelompok.destroy', $item->id) }}" method="POST" class="d-inline">
+
+                            @csrf
+                            @method('DELETE')
+
+                            <button class="btn btn-danger btn-sm"
+                                onclick="return confirm('Yakin hapus data ini?')">
+                                <i class="bi bi-trash"></i>
+                            </button>
+
+                        </form>
+
+                    </td>
+
+                </tr>
+
+                @empty
+
+                <tr>
+                    <td colspan="4" class="text-center">
+                        Data belum tersedia
+                    </td>
+                </tr>
+
+                @endforelse
+
+            </tbody>
+
+        </table>
 
     </div>
 
-    <div class="card p-3">
-
-        <div class="table-responsive">
-
-            <table class="table table-bordered table-hover">
-
-                <thead class="table-dark text-center">
-                    <tr>
-                        <th>No</th>
-                        <th>Nama Dusun</th>
-                        <th>Tanggal</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-
-                    @forelse($data as $item)
-
-                        <tr>
-
-                            <td class="text-center">
-                                {{ $loop->iteration }}
-                            </td>
-
-                            <td>
-                                {{ $item->dusun }}
-                            </td>
-
-                            <td>
-                                {{ $item->tanggal }}
-                            </td>
-
-                            <td class="text-center">
-
-                                <a href="{{ route('alternatif.detail', $item->id) }}" class="btn btn-info btn-sm">
-
-                                    Calon Penerima
-
-                                </a>
-
-                                <form action="{{ route('kelompok.destroy', $item->id) }}" method="POST" class="d-inline">
-
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button type="submit" class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Yakin ingin menghapus data dusun ini?')">
-
-                                        Hapus
-
-                                    </button>
-
-                                </form>
-
-                            </td>
-
-                        </tr>
-
-                    @empty
-
-                        <tr>
-                            <td colspan="4" class="text-center">
-                                Data belum tersedia
-                            </td>
-                        </tr>
-
-                    @endforelse
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
+</div>
 
 @endsection

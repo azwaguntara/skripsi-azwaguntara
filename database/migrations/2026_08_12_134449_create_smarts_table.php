@@ -6,34 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('smarts', function (Blueprint $table) {
             $table->id();
-
             $table->foreignId('alternatif_id')
-                ->constrained('alternatifs')
-                ->cascadeOnDelete();
-
-            $table->foreignId('kelompok_id')
-                ->constrained('kelompok_alternatifs')
-                ->cascadeOnDelete();
-
-            $table->decimal('nilai', 15, 10);
-            $table->unsignedInteger('ranking');
-
+                ->constrained()
+                ->onDelete('cascade');
+            $table->double('nilai');
+            $table->integer('ranking');
+            $table->unsignedBigInteger('kelompok_id')->nullable();
             $table->timestamps();
-
-            $table->unique(['alternatif_id', 'kelompok_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('smarts');

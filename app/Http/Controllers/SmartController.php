@@ -22,55 +22,96 @@ class SmartController extends Controller
     {
         $kelompok = KelompokAlternatif::findOrFail($id);
 
-        $alternatifs = Alternatif::where('kelompok_id', $id)->get();
+        $alternatifs = Alternatif::where(
+            'kelompok_id',
+            $id
+        )->get();
 
         if ($alternatifs->isEmpty()) {
 
-            return redirect()->route('smart.index')
-                ->with('error', 'Dusun belum memiliki data alternatif');
-
+            return redirect()
+                ->route('smart.index')
+                ->with(
+                    'error',
+                    'Dusun belum memiliki data alternatif'
+                );
         }
 
         $kriterias = Kriteria::all();
 
-        $penilaians = Penilaian::whereHas('alternatif', function ($q) use ($id) {
-            $q->where('kelompok_id', $id);
-        })->get();
+        /*
+        |--------------------------------------------------------------------------
+        | AMBIL DATA PENILAIAN SEKALI
+        |--------------------------------------------------------------------------
+        */
+
+        $alternatifIds = $alternatifs->pluck('id');
+
+        $penilaians = Penilaian::whereIn(
+            'alternatif_id',
+            $alternatifIds
+        )
+            ->get()
+            ->keyBy(function ($item) {
+
+                return $item->alternatif_id
+                    . '-'
+                    . $item->kriteria_id;
+            });
+
 
         // ===============================
         // 1. NORMALISASI BOBOT
         // ===============================
+
         $totalBobot = $kriterias->sum('bobot');
 
         foreach ($kriterias as $k) {
+
             $k->normalisasi = $totalBobot != 0
                 ? $k->bobot / $totalBobot
                 : 0;
         }
 
+
         // ===============================
         // 2. MATRIX
         // ===============================
+
         $matrix = [];
 
         foreach ($alternatifs as $alt) {
 
             foreach ($kriterias as $k) {
 
-                $data = $penilaians
-                    ->where('alternatif_id', $alt->id)
-                    ->where('kriteria_id', $k->id)
-                    ->first();
+                $key =
+                    $alt->id
+                    . '-'
+                    . $k->id;
 
-                $matrix[$alt->id][$k->id] = $data
+                $data = $penilaians->get($key);
+
+                /*
+                |--------------------------------------------------------------------------
+                | Jika belum ada penilaian:
+                | tetap NULL untuk kebutuhan perhitungan.
+                |
+                | Di Blade boleh ditampilkan sebagai 0.
+                |--------------------------------------------------------------------------
+                */
+
+                $matrix[$alt->id][$k->id] =
+                    $data
                     ? $data->nilai
-                    : 0;
+                    : null;
             }
         }
+
 
         // ===============================
         // 3. MIN MAX
         // ===============================
+
         $minmax = [];
 
         foreach ($kriterias as $k) {
@@ -79,132 +120,382 @@ class SmartController extends Controller
 
             foreach ($alternatifs as $alt) {
 
-                if (isset($matrix[$alt->id][$k->id])) {
-                    $values[] = $matrix[$alt->id][$k->id];
-                }
+                $nilai =
+                    $matrix[$alt->id][$k->id];
 
+                /*
+                |--------------------------------------------------------------------------
+                | Nilai kosong TIDAK dimasukkan
+                | ke dalam MIN dan MAX.
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $nilai !== null &&
+                    $nilai !== ''
+                ) {
+
+                    $values[] = (float) $nilai;
+                }
             }
 
             $minmax[$k->id] = [
+
                 'nama' => $k->nama,
-                'min' => count($values) ? min($values) : 0,
-                'max' => count($values) ? max($values) : 0
+
+                'min' => count($values)
+                    ? min($values)
+                    : 0,
+
+                'max' => count($values)
+                    ? max($values)
+                    : 0
             ];
         }
 
-        $hasil = [];
-        $detail = [];
 
         // ===============================
         // 4. HITUNG SMART
         // ===============================
+
+        $hasil = [];
+
+        $detail = [];
+
         foreach ($alternatifs as $alt) {
 
             $nilaiAkhir = 0;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Detail sekarang di-index berdasarkan
+            | ID alternatif dan ID kriteria.
+            |
+            | Contoh:
+            | $detail[1][1]['utility']
+            |--------------------------------------------------------------------------
+            */
+
             $detailAlt = [];
 
             foreach ($kriterias as $k) {
 
-                $nilai = $matrix[$alt->id][$k->id];
-                $min = $minmax[$k->id]['min'];
-                $max = $minmax[$k->id]['max'];
+                $nilai =
+                    $matrix[$alt->id][$k->id];
 
-                if ($max == $min) {
+                $min =
+                    $minmax[$k->id]['min'];
 
-                    if ($max == 0) {
-                        $utilitas = 0;
-                    } else {
-                        $utilitas = 1;
-                    }
+                $max =
+                    $minmax[$k->id]['max'];
 
-                } else {
 
-                    if ($k->tipe == 'benefit') {
-                        $utilitas = ($nilai - $min) / ($max - $min);
-                    } else {
-                        $utilitas = ($max - $nilai) / ($max - $min);
-                    }
+                // ===============================
+                // PERHITUNGAN UTILITY
+                // ===============================
 
+                /*
+                |--------------------------------------------------------------------------
+                | NILAI KOSONG
+                |--------------------------------------------------------------------------
+                */
+
+                if (
+                    $nilai === null ||
+                    $nilai === ''
+                ) {
+
+                    /*
+                    | Jangan dianggap sebagai 0
+                    | dalam perhitungan.
+                    */
+
+                    $utilitas = null;
                 }
 
-                $hasilKali = $k->normalisasi * $utilitas;
+
+                // ===============================
+                // MIN = MAX
+                // ===============================
+
+                elseif ($max == $min) {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Jika semua nilai pada kriteria
+                    | sama dan nilainya 0.
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if ($max == 0) {
+
+                        $utilitas = 0;
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Jika semua nilai sama dan nilainya
+                    | bukan 0, utility = 1.
+                    |
+                    | Ini berlaku untuk benefit maupun cost.
+                    |--------------------------------------------------------------------------
+                    */ else {
+
+                        $utilitas = 1;
+                    }
+                }
+
+
+                // ===============================
+                // MIN != MAX
+                // ===============================
+
+                else {
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | BENEFIT
+                    |--------------------------------------------------------------------------
+                    */
+
+                    if (
+                        strtolower($k->tipe)
+                        == 'benefit'
+                    ) {
+
+                        $utilitas =
+                            (
+                                $nilai - $min
+                            )
+                            /
+                            (
+                                $max - $min
+                            );
+                    }
+
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | COST
+                    |--------------------------------------------------------------------------
+                    */ else {
+
+                        $utilitas =
+                            (
+                                $max - $nilai
+                            )
+                            /
+                            (
+                                $max - $min
+                            );
+                    }
+                }
+
+
+                // ===============================
+                // NILAI AKHIR KRITERIA
+                // ===============================
+
+                $hasilKali =
+                    $utilitas !== null
+                    ? $k->normalisasi * $utilitas
+                    : 0;
 
                 $nilaiAkhir += $hasilKali;
 
-                $detailAlt[] = [
+
+                // ===============================
+                // DETAIL
+                // ===============================
+
+                /*
+                |--------------------------------------------------------------------------
+                | PENTING:
+                |
+                | Jangan pakai [] lagi.
+                | Gunakan ID kriteria sebagai key.
+                |--------------------------------------------------------------------------
+                */
+
+                $detailAlt[$k->id] = [
+
                     'kriteria' => $k->nama,
+
                     'nilai' => $nilai,
+
                     'utility' => $utilitas,
+
                     'bobot' => $k->normalisasi,
+
                     'hasil' => $hasilKali
                 ];
             }
 
+
+            // ===============================
+            // HASIL ALTERNATIF
+            // ===============================
+
             $hasil[] = [
+
+                'id' => $alt->id,
+
                 'nama' => $alt->nama,
+
                 'nilai' => $nilaiAkhir
             ];
 
-            $detail[$alt->nama] = $detailAlt;
+
+            // ===============================
+            // DETAIL
+            // ===============================
+
+            /*
+            |--------------------------------------------------------------------------
+            | PENTING:
+            |
+            | Sekarang menggunakan ID alternatif.
+            |--------------------------------------------------------------------------
+            */
+
+            $detail[$alt->id] = $detailAlt;
         }
 
-        usort($hasil, function ($a, $b) {
-            return $b['nilai'] <=> $a['nilai'];
-        });
+
+        // ===============================
+        // 5. URUTKAN RANKING
+        // ===============================
+
+        usort(
+            $hasil,
+            function ($a, $b) {
+
+                return $b['nilai']
+                    <=>
+                    $a['nilai'];
+            }
+        );
 
 
+        // ===============================
+        // 6. SIMPAN HASIL SMART
+        // ===============================
 
-        $periode = date('F Y', strtotime($kelompok->tanggal));
+        /*
+        |--------------------------------------------------------------------------
+        | Ambil hasil SMART yang sudah ada SEKALI
+        |--------------------------------------------------------------------------
+        */
 
-        Smart::where('kelompok_id', $id)
-            ->where('periode', $periode)
-            ->delete();
+        $smartLama = Smart::where(
+            'kelompok_id',
+            $id
+        )
+            ->whereIn(
+                'alternatif_id',
+                $alternatifIds
+            )
+            ->get()
+            ->keyBy('alternatif_id');
+
 
         foreach ($hasil as $index => $item) {
 
-            $alternatif = Alternatif::where('nama', $item['nama'])
-                ->where('kelompok_id', $id)
-                ->first();
+            $alternatifId =
+                $item['id'];
 
-            if ($alternatif) {
+
+            /*
+            |--------------------------------------------------------------------------
+            | UPDATE
+            |--------------------------------------------------------------------------
+            */
+
+            if (
+                $smartLama->has(
+                    $alternatifId
+                )
+            ) {
+
+                $smart =
+                    $smartLama->get(
+                        $alternatifId
+                    );
+
+                $smart->nilai =
+                    $item['nilai'];
+
+                $smart->ranking =
+                    $index + 1;
+
+                $smart->save();
+            }
+
+
+            /*
+            |--------------------------------------------------------------------------
+            | CREATE
+            |--------------------------------------------------------------------------
+            */ else {
 
                 Smart::create([
-                    'alternatif_id' => $alternatif->id,
-                    'kelompok_id' => $id,
-                    'nilai' => $item['nilai'],
-                    'ranking' => $index + 1,
-                    'periode' => $periode
 
+                    'alternatif_id' =>
+                    $alternatifId,
+
+                    'kelompok_id' =>
+                    $id,
+
+                    'nilai' =>
+                    $item['nilai'],
+
+                    'ranking' =>
+                    $index + 1,
                 ]);
-
             }
         }
 
-        return view('smart.detail', compact(
-            'kelompok',
-            'hasil',
-            'kriterias',
-            'alternatifs',
-            'matrix',
-            'minmax',
-            'detail'
-        ));
+
+        // ===============================
+        // 7. TAMPILKAN HASIL
+        // ===============================
+
+        return view(
+            'smart.detail',
+            compact(
+                'kelompok',
+                'hasil',
+                'kriterias',
+                'alternatifs',
+                'matrix',
+                'minmax',
+                'detail'
+            )
+        );
     }
+
 
     public function print($id)
     {
-        $kelompok = KelompokAlternatif::findOrFail($id);
+        $kelompok =
+            KelompokAlternatif::findOrFail($id);
+
         $hasil = Smart::with('alternatif')
-            ->where('kelompok_id', $id)
+            ->where(
+                'kelompok_id',
+                $id
+            )
             ->orderBy('ranking')
             ->get();
 
-        $alternatifs = Alternatif::where(
-            'kelompok_id',
-            $id
-        )->get();
+        $alternatifs =
+            Alternatif::where(
+                'kelompok_id',
+                $id
+            )->get();
 
-        $kriterias = Kriteria::all();
+        $kriterias =
+            Kriteria::all();
 
         return view(
             'smart.print',
@@ -216,5 +507,4 @@ class SmartController extends Controller
             )
         );
     }
-
 }

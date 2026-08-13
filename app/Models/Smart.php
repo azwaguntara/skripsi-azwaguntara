@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Smart extends Model
 {
@@ -11,24 +10,13 @@ class Smart extends Model
         'alternatif_id',
         'kelompok_id',
         'nilai',
-        'ranking',
+        'ranking'
     ];
 
-    protected $casts = [
-        'nilai' => 'decimal:10',
-        'ranking' => 'integer',
-    ];
+    protected $table = 'smarts';
 
-    public function alternatif(): BelongsTo
+    public function alternatif()
     {
         return $this->belongsTo(Alternatif::class);
-    }
-
-    public function kelompok(): BelongsTo
-    {
-        return $this->belongsTo(
-            KelompokAlternatif::class,
-            'kelompok_id'
-        );
     }
 }

@@ -6,24 +6,18 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('kriterias', function (Blueprint $table) {
             $table->id();
-            $table->string('kode', 10)->unique();
+            $table->string('kode');
             $table->string('nama');
-            $table->decimal('bobot', 8, 2);
+            $table->double('bobot');
             $table->enum('tipe', ['benefit', 'cost']);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('kriterias');
