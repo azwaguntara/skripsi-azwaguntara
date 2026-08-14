@@ -350,14 +350,6 @@ class SmartController extends Controller
             // DETAIL
             // ===============================
 
-            /*
-            |--------------------------------------------------------------------------
-            | PENTING:
-            |
-            | Sekarang menggunakan ID alternatif.
-            |--------------------------------------------------------------------------
-            */
-
             $detail[$alt->id] = $detailAlt;
         }
 
@@ -369,24 +361,28 @@ class SmartController extends Controller
         usort(
             $hasil,
             function ($a, $b) {
-
-                return $b['nilai']
-                    <=>
-                    $a['nilai'];
+                return $b['nilai'] <=> $a['nilai'];
             }
         );
 
+        // Nilai yang sama mendapatkan ranking yang sama
+        foreach ($hasil as $key => $item) {
+
+            $ranking = 1;
+
+            foreach ($hasil as $pembanding) {
+
+                if ($pembanding['nilai'] > $item['nilai']) {
+                    $ranking++;
+                }
+            }
+
+            $hasil[$key]['ranking'] = $ranking;
+        }
 
         // ===============================
         // 6. SIMPAN HASIL SMART
         // ===============================
-
-        /*
-        |--------------------------------------------------------------------------
-        | Ambil hasil SMART yang sudah ada SEKALI
-        |--------------------------------------------------------------------------
-        */
-
         $smartLama = Smart::where(
             'kelompok_id',
             $id
@@ -398,63 +394,42 @@ class SmartController extends Controller
             ->get()
             ->keyBy('alternatif_id');
 
+        foreach ($hasil as $item) {
 
-        foreach ($hasil as $index => $item) {
+            $alternatifId = $item['id'];
 
-            $alternatifId =
-                $item['id'];
+            // ===============================
+            // UPDATE
+            // ===============================
 
+            if ($smartLama->has($alternatifId)) {
 
-            /*
-            |--------------------------------------------------------------------------
-            | UPDATE
-            |--------------------------------------------------------------------------
-            */
+                $smart = $smartLama->get($alternatifId);
 
-            if (
-                $smartLama->has(
-                    $alternatifId
-                )
-            ) {
-
-                $smart =
-                    $smartLama->get(
-                        $alternatifId
-                    );
-
-                $smart->nilai =
-                    $item['nilai'];
-
-                $smart->ranking =
-                    $index + 1;
+                $smart->nilai = $item['nilai'];
+                $smart->ranking = $item['ranking'];
 
                 $smart->save();
             }
 
-
-            /*
-            |--------------------------------------------------------------------------
-            | CREATE
-            |--------------------------------------------------------------------------
-            */ else {
+            // ===============================
+            // CREATE
+            // ===============================
+            else {
 
                 Smart::create([
 
-                    'alternatif_id' =>
-                    $alternatifId,
+                    'alternatif_id' => $alternatifId,
 
-                    'kelompok_id' =>
-                    $id,
+                    'kelompok_id' => $id,
 
-                    'nilai' =>
-                    $item['nilai'],
+                    'nilai' => $item['nilai'],
 
-                    'ranking' =>
-                    $index + 1,
+                    'ranking' => $item['ranking'],
+
                 ]);
             }
         }
-
 
         // ===============================
         // 7. TAMPILKAN HASIL

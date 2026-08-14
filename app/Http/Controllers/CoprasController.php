@@ -174,8 +174,9 @@ class CoprasController extends Controller
         $sumInv = 0;
 
         foreach ($sminus as $val) {
-
-            $sumInv += 1 / ($val + 0.00001);
+            if ($val != 0) {
+                $sumInv += 1 / $val;
+            }
         }
 
         // ==========================================
@@ -195,14 +196,18 @@ class CoprasController extends Controller
                 continue;
             }
 
-            $qi = $splus[$alt->id] +
-                (
-                    $totalSminus /
+
+            if ($sminus[$alt->id] != 0 && $sumInv != 0) {
+                $qi = $splus[$alt->id] +
                     (
-                        ($sminus[$alt->id] + 0.00001)
-                        * $sumInv
-                    )
-                );
+                        $totalSminus /
+                        (
+                            $sminus[$alt->id] * $sumInv
+                        )
+                    );
+            } else {
+                $qi = $splus[$alt->id];
+            }
 
             $qiData[$alt->id] = $qi;
         }
@@ -260,21 +265,28 @@ class CoprasController extends Controller
         usort(
             $hasil,
             function ($a, $b) {
-
                 return $b['qi'] <=> $a['qi'];
             }
         );
 
+        // Jika nilai Qi sama, maka ranking juga sama.
+        foreach ($hasil as $key => $item) {
+
+            $ranking = 1;
+
+            foreach ($hasil as $pembanding) {
+
+                if ($pembanding['qi'] > $item['qi']) {
+                    $ranking++;
+                }
+            }
+
+            $hasil[$key]['ranking'] = $ranking;
+        }
+
         // ==========================================
         // 10. SIMPAN HASIL COPRAS
         // ==========================================
-
-        /*
-        |--------------------------------------------------------------------------
-        | OPTIMASI:
-        | Ambil seluruh hasil Copras lama SEKALI.
-        |--------------------------------------------------------------------------
-        */
 
         $coprasLama = Copras::where(
             'kelompok_id',
@@ -290,15 +302,9 @@ class CoprasController extends Controller
         $dataUpdate = [];
         $dataInsert = [];
 
-        foreach ($hasil as $index => $item) {
+        foreach ($hasil as $item) {
 
             $alternatifId = $item['id'];
-
-            /*
-            |--------------------------------------------------------------------------
-            | Jika data Copras sudah ada
-            |--------------------------------------------------------------------------
-            */
 
             if ($coprasLama->has($alternatifId)) {
 
@@ -306,21 +312,15 @@ class CoprasController extends Controller
 
                 $dataUpdate[$copras->id] = [
                     'nilai' => $item['qi'],
-                    'ranking' => $index + 1
+                    'ranking' => $item['ranking']
                 ];
-            }
-
-            /*
-            |--------------------------------------------------------------------------
-            | Jika data Copras belum ada
-            |--------------------------------------------------------------------------
-            */ else {
+            } else {
 
                 $dataInsert[] = [
                     'alternatif_id' => $alternatifId,
                     'kelompok_id' => $id,
                     'nilai' => $item['qi'],
-                    'ranking' => $index + 1,
+                    'ranking' => $item['ranking'],
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -513,6 +513,8 @@ class CoprasController extends Controller
             function ($item) use ($qmax) {
 
                 return [
+
+                    'ranking' => $item->ranking,
 
                     'nama' => $item->alternatif->nama,
 

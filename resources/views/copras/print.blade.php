@@ -1,30 +1,100 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 
 <head>
-
     <meta charset="UTF-8">
 
-    <title>Sistem Penentuan Penerima BLT-DD</title>
+    <title>Perhitungan COPRAS - BLT-DD Desa Sei Bamban</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
         body {
-            padding: 30px;
-            font-size: 14px;
+            padding: 30px 40px;
+            font-size: 13px;
+            color: #000;
+            background: #fff;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .header h4 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            margin: 0;
+            font-size: 13px;
+        }
+
+        .info {
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 10px;
         }
 
         table {
             width: 100%;
+            border-collapse: collapse;
         }
 
         th,
         td {
-            border: 1px solid black !important;
-            padding: 8px !important;
+            border: 1px solid #000 !important;
+            padding: 7px 8px !important;
             text-align: center;
             vertical-align: middle;
+        }
+
+        thead th {
+            font-weight: 700;
+            background-color: #212529 !important;
+            color: #fff !important;
+        }
+
+        .nama-alternatif {
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .table-section {
+            margin-bottom: 30px;
+        }
+
+        .signature {
+            width: 280px;
+            margin-left: auto;
+            margin-top: 50px;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .signature-space {
+            height: 80px;
+        }
+
+        .signature-name {
+            font-weight: 700;
+            text-decoration: underline;
+            text-transform: uppercase;
+            margin-bottom: 0;
+        }
+
+        .print-button {
+            margin-bottom: 25px;
         }
 
         @media print {
@@ -34,70 +104,128 @@
                 margin: 10mm;
             }
 
-            .no-print {
-                display: none;
+            body {
+                padding: 0;
+                font-size: 11px;
             }
 
+            .no-print {
+                display: none !important;
+            }
+
+            .header h4 {
+                font-size: 16px;
+            }
+
+            .header p,
+            .info {
+                font-size: 11px;
+            }
+
+            .section-title {
+                font-size: 13px;
+            }
+
+            th,
+            td {
+                padding: 5px 6px !important;
+            }
+
+            .table-section {
+                margin-bottom: 20px;
+            }
+
+            .signature {
+                margin-top: 30px;
+                font-size: 11px;
+            }
+
+            .signature-space {
+                height: 60px;
+            }
         }
     </style>
-
 </head>
 
 <body>
 
-        <!-- JUDUL -->
+    <!-- HEADER -->
 
+    <div class="header">
 
-        <h4 class="text-center fw-bold mb-4">
-
-            Data Perhitungan COPRAS Alternatif Penerima <br>
-
-            BLT-DD Desa Sei Bamban
-
+        <h4>
+            DATA PERHITUNGAN COPRAS
         </h4>
 
-        <div class="mb-4">
+        <p>
+            Alternatif Penerima Bantuan Langsung Tunai Dana Desa (BLT-DD)
+        </p>
 
-            <b>Dusun :</b>
-            {{ $kelompok->dusun }}
+        <p>
+            Desa Sei Bamban
+        </p>
 
-            <br>
+    </div>
 
-            <b>Tanggal :</b>
-            {{ $kelompok->tanggal }}
 
+    <!-- INFORMASI -->
+
+    <div class="info">
+
+        <div>
+            <strong>Dusun</strong>
+            : {{ $kelompok->dusun }}
         </div>
 
-        <div class="mb-4 no-print">
-
-            <button onclick="window.print()" class="btn btn-danger">
-
-                <i class="bi bi-printer"></i>
-                Print
-
-            </button>
-
+        <div>
+            <strong>Tanggal</strong>
+            : {{ $kelompok->tanggal }}
         </div>
 
-        <!-- TABEL MATRIX -->
+    </div>
 
-        <h5 class="fw-bold mb-3">
-            Tabel Penilaian
-        </h5>
 
-        <table class="table table-bordered mb-5">
+    <!-- BUTTON PRINT -->
 
-            <thead class="table-dark">
+    <div class="print-button no-print">
+
+        <button onclick="window.print()" class="btn btn-danger">
+
+            <i class="bi bi-printer"></i>
+            Cetak
+
+        </button>
+
+    </div>
+
+
+    <!-- TABEL PENILAIAN -->
+
+    <div class="table-section">
+
+        <div class="section-title">
+            1. Tabel Penilaian Alternatif
+        </div>
+
+        <table>
+
+            <thead>
 
                 <tr>
 
-                    <th>Alternatif</th>
+                    <th style="width: 60px;">
+                        No.
+                    </th>
+
+                    <th>
+                        Alternatif
+                    </th>
 
                     @foreach($kriterias as $k)
 
-                        <th>
-                            {{ $k->nama }}
-                        </th>
+                    <th>
+                        {{ $k->nama }}
+                    </th>
 
                     @endforeach
 
@@ -109,25 +237,25 @@
 
                 @foreach($alternatifs as $alt)
 
-                    <tr>
+                <tr>
 
-                        <td>
-                            {{ $alt->nama }}
-                        </td>
+                    <td>
+                        {{ $loop->iteration }}
+                    </td>
 
-                        @foreach($kriterias as $k)
+                    <td class="nama-alternatif">
+                        {{ $alt->nama }}
+                    </td>
 
-                                    <td>
+                    @foreach($kriterias as $k)
 
-                                        {{
-                            $matrix[$alt->id][$k->id]
-                                                                                    }}
+                    <td>
+                        {{ number_format($matrix[$alt->id][$k->id], 0) }}
+                    </td>
 
-                                    </td>
+                    @endforeach
 
-                        @endforeach
-
-                    </tr>
+                </tr>
 
                 @endforeach
 
@@ -135,22 +263,38 @@
 
         </table>
 
-        <!-- TABEL HASIL -->
+    </div>
 
-        <h5 class="fw-bold mb-3">
-            Hasil Ranking COPRAS
-        </h5>
 
-        <table class="table table-bordered">
+    <!-- HASIL RANKING -->
 
-            <thead class="table-dark">
+    <div class="table-section">
+
+        <div class="section-title">
+            2. Hasil Perankingan COPRAS
+        </div>
+
+        <table>
+
+            <thead>
 
                 <tr>
 
-                    <th>Ranking</th>
-                    <th>Alternatif</th>
-                    <th>Qi</th>
-                    <th>Utility (%)</th>
+                    <th style="width: 80px;">
+                        Ranking
+                    </th>
+
+                    <th>
+                        Alternatif
+                    </th>
+
+                    <th style="width: 150px;">
+                        Qi
+                    </th>
+
+                    <th style="width: 150px;">
+                        Utility (%)
+                    </th>
 
                 </tr>
 
@@ -160,25 +304,25 @@
 
                 @foreach($ranking as $item)
 
-                    <tr>
+                <tr>
 
-                        <td>
-                            {{ $loop->iteration }}
-                        </td>
+                    <td>
+                        {{ $item['ranking'] }}
+                    </td>
 
-                        <td>
-                            {{ $item['nama'] }}
-                        </td>
+                    <td class="nama-alternatif">
+                        {{ $item['nama'] }}
+                    </td>
 
-                        <td>
-                            {{ number_format($item['qi'], 4) }}
-                        </td>
+                    <td>
+                        {{ number_format($item['qi'], 4, '.', '') }}
+                    </td>
 
-                        <td>
-                            {{ number_format($item['ui'], 2) }}%
-                        </td>
+                    <td>
+                        {{ number_format($item['ui'], 2, '.', '') }}%
+                    </td>
 
-                    </tr>
+                </tr>
 
                 @endforeach
 
@@ -186,43 +330,44 @@
 
         </table>
 
-        <!-- TTD -->
-
-        <div class="mt-5 text-end">
-
-            <p class="mb-5">
-
-                Sei Bamban,
-                {{ date('d-m-Y') }}
-
-                <br>
-                Disahkan oleh : <br>
-
-            </p>
-
-            <br><br><br>
-
-            <h6 class="fw-bold text-uppercase
-            text-decoration-underline mb-0">
-
-                Rudi Ariyanto
+    </div>
 
 
-            </h6>
+    <!-- TANDA TANGAN -->
+
+    <div class="signature">
+
+        <div>
+            Sei Bamban, {{ date('d-m-Y') }}
+        </div>
+
+        <div>
+            Disahkan oleh,
+        </div>
+
+        <div>
             Kepala Desa Sei Bamban
+        </div>
 
+        <div class="signature-space"></div>
+
+        <p class="signature-name">
+            Rudi Ariyanto
+        </p>
+
+        <div>
+            Kepala Desa Sei Bamban
         </div>
 
     </div>
 
-    <script>
 
-        window.onload = function () {
+    <script>
+        window.onload = function() {
 
             window.print();
 
-        }
-
+        };
     </script>
 
 </body>

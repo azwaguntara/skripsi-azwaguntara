@@ -302,31 +302,10 @@
 
                         @foreach($hasil as $index => $h)
 
-                        <tr
-                            class="{{ $index == 0
-                                ? 'table-success fw-bold'
-                                : '' }}">
+                        <tr class="{{ $index == 0 ? 'table-success fw-bold' : '' }}">
 
                             <td>
-
-                                @if($index == 0)
-
-                                1
-
-                                @elseif($index == 1)
-
-                                2
-
-                                @elseif($index == 2)
-
-                                3
-
-                                @else
-
-                                {{ $index + 1 }}
-
-                                @endif
-
+                                {{ $h['ranking'] }}
                             </td>
 
                             <td>
@@ -342,7 +321,6 @@
                         @endforeach
 
                     </tbody>
-
                 </table>
 
             </div>

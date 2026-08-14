@@ -167,13 +167,7 @@
                         <td class="text-start">{{ $h['nama'] }}</td>
                         <td>{{ number_format($h['qi'], 4) }}</td>
                         <td>{{ number_format($h['ui'], 2) }}%</td>
-                        <td>
-                            @if($i == 0) 1
-                            @elseif($i == 1) 2
-                            @elseif($i == 2) 3
-                            @else {{ $i + 1 }}
-                            @endif
-                        </td>
+                        <td>{{ $h['ranking'] }}</td>
                     </tr>
                     @endforeach
                 </tbody>
