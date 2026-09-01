@@ -10,6 +10,13 @@ class KelompokAlternatif extends Model
     protected $fillable = [
         'dusun',
         'tanggal',
+        'smart_processed_at',
+        'copras_processed_at',
+    ];
+
+    protected $casts = [
+        'smart_processed_at' => 'datetime',
+        'copras_processed_at' => 'datetime',
     ];
 
     public function alternatifs(): HasMany

@@ -3,11 +3,16 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Alternatif;
 use App\Models\Kriteria;
 use App\Models\Penilaian;
 use App\Models\Smart;
 use App\Models\KelompokAlternatif;
+use Carbon\Carbon;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class SmartController extends Controller
 {
@@ -310,8 +315,6 @@ class SmartController extends Controller
 
                 /*
                 |--------------------------------------------------------------------------
-                | PENTING:
-                |
                 | Jangan pakai [] lagi.
                 | Gunakan ID kriteria sebagai key.
                 |--------------------------------------------------------------------------
@@ -336,13 +339,15 @@ class SmartController extends Controller
             // HASIL ALTERNATIF
             // ===============================
 
+            $smartData = Smart::where('alternatif_id', $alt->id)
+                ->where('kelompok_id', $id)
+                ->first();
+
             $hasil[] = [
-
                 'id' => $alt->id,
-
                 'nama' => $alt->nama,
-
-                'nilai' => $nilaiAkhir
+                'nilai' => $nilaiAkhir,
+                'status' => $smartData->status ?? 'Direkomendasikan',
             ];
 
 
@@ -431,6 +436,49 @@ class SmartController extends Controller
             }
         }
 
+        foreach ($hasil as $key => $item) {
+
+            $smart = Smart::where('alternatif_id', $item['id'])
+                ->where('kelompok_id', $id)
+                ->first();
+
+            $hasil[$key]['smart_id'] = $smart?->id;
+            $hasil[$key]['status'] = $smart?->status ?? 'Direkomendasikan';
+        }
+
+        // Cek waktu terakhir perubahan data penilaian
+        $lastPenilaianUpdate = Penilaian::whereIn(
+            'alternatif_id',
+            $alternatifIds
+        )->max('updated_at');
+
+        // Tentukan apakah waktu proses perlu diperbarui
+        $perluUpdateWaktu = false;
+
+        // Jika belum pernah diproses
+        if (is_null($kelompok->smart_processed_at)) {
+            $perluUpdateWaktu = true;
+        }
+
+        // Jika sudah pernah diproses dan ada perubahan penilaian
+        elseif (
+            $lastPenilaianUpdate &&
+            Carbon::parse($lastPenilaianUpdate)
+            ->gt(Carbon::parse($kelompok->smart_processed_at))
+        ) {
+            $perluUpdateWaktu = true;
+        }
+
+        // Simpan waktu hanya jika memang perlu
+        if ($perluUpdateWaktu) {
+
+            DB::table('kelompok_alternatifs')
+                ->where('id', $id)
+                ->update([
+                    'smart_processed_at' => now(),
+                    'updated_at' => now(),
+                ]);
+        }
         // ===============================
         // 7. TAMPILKAN HASIL
         // ===============================
@@ -449,28 +497,52 @@ class SmartController extends Controller
         );
     }
 
+    public function tetapkan($id)
+    {
+        $smart = Smart::findOrFail($id);
+
+        $smart->update([
+            'status' => 'Ditetapkan',
+        ]);
+
+        return back()->with(
+            'success',
+            'Alternatif ' . $smart->alternatif->nama . ' berhasil ditetapkan sebagai penerima.'
+        );
+    }
+
 
     public function print($id)
     {
-        $kelompok =
-            KelompokAlternatif::findOrFail($id);
+        $kelompok = KelompokAlternatif::findOrFail($id);
+
+        if (empty($kelompok->verification_token)) {
+            $kelompok->verification_token = Str::uuid();
+            $kelompok->save();
+        }
 
         $hasil = Smart::with('alternatif')
-            ->where(
-                'kelompok_id',
-                $id
-            )
+            ->where('kelompok_id', $id)
             ->orderBy('ranking')
             ->get();
 
-        $alternatifs =
-            Alternatif::where(
-                'kelompok_id',
-                $id
-            )->get();
+        $alternatifs = Alternatif::with('penilaians')
+            ->where('kelompok_id', $id)
+            ->get();
 
-        $kriterias =
-            Kriteria::all();
+        $kriterias = Kriteria::all();
+
+        $verificationUrl = route(
+            'smart.verify',
+            $kelompok->verification_token
+        );
+
+        $qrCode = base64_encode(
+            QrCode::format('svg')
+                ->size(110)
+                ->margin(1)
+                ->generate($verificationUrl)
+        );
 
         return view(
             'smart.print',
@@ -478,6 +550,81 @@ class SmartController extends Controller
                 'kelompok',
                 'alternatifs',
                 'kriterias',
+                'hasil',
+                'qrCode'
+            )
+        );
+    }
+
+    public function downloadPdf($id)
+    {
+        $kelompok = KelompokAlternatif::findOrFail($id);
+
+        if (empty($kelompok->verification_token)) {
+            $kelompok->verification_token = Str::uuid();
+            $kelompok->save();
+        }
+
+        $kriterias = Kriteria::orderBy('kode')->get();
+
+        $alternatifs = Alternatif::with('penilaians')
+            ->where('kelompok_id', $id)
+            ->get();
+
+        $hasil = Smart::with('alternatif')
+            ->whereIn(
+                'alternatif_id',
+                $alternatifs->pluck('id')
+            )
+            ->orderBy('ranking')
+            ->get();
+
+        $verificationUrl = route(
+            'smart.verify',
+            $kelompok->verification_token
+        );
+
+        $qrCode = base64_encode(
+            QrCode::format('svg')
+                ->size(110)
+                ->margin(1)
+                ->generate($verificationUrl)
+        );
+
+        $pdf = Pdf::loadView(
+            'smart.print',
+            compact(
+                'kelompok',
+                'kriterias',
+                'alternatifs',
+                'hasil',
+                'qrCode'
+            ) + [
+                'isPdf' => true
+            ]
+        )->setPaper('a4', 'landscape');
+
+        return $pdf->download(
+            'Perhitungan-SMART-' . $kelompok->dusun . '.pdf'
+        );
+    }
+
+    public function verify($token)
+    {
+        $kelompok = KelompokAlternatif::where(
+            'verification_token',
+            $token
+        )->firstOrFail();
+
+        $hasil = Smart::with('alternatif')
+            ->where('kelompok_id', $kelompok->id)
+            ->orderBy('ranking')
+            ->get();
+
+        return view(
+            'smart.verify',
+            compact(
+                'kelompok',
                 'hasil'
             )
         );

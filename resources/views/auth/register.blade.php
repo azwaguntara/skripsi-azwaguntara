@@ -19,19 +19,65 @@
                 <div class="card shadow-lg border-0" style="border-radius:18px;">
                     <div class="card-body bg-dark text-white p-4">
 
-                        <h4 class="text-center mb-4">Register SPK Bansos</h4>
+                        <h4 class="text-center mb-4">Register SPK Bansos BLT-DD Desa Sei Bamban</h4>
 
                         <form method="POST" action="{{ route('register') }}">
                             @csrf
 
-                            <!-- Name -->
+                            <!-- Nama -->
                             <div class="mb-3">
                                 <label class="form-label">Nama</label>
-                                <input type="text" name="name"
+
+                                <input type="text"
+                                    name="name"
                                     class="form-control bg-dark text-white border-secondary"
-                                    value="{{ old('name') }}" required>
+                                    value="{{ old('name') }}"
+                                    required>
 
                                 @error('name')
+                                <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <!-- NIK -->
+                            <div class="mb-3">
+                                <label class="form-label">NIK</label>
+
+                                <input type="text"
+                                    name="nik"
+                                    class="form-control bg-dark text-white border-secondary"
+                                    value="{{ old('nik') }}"
+                                    maxlength="16"
+                                    minlength="16"
+                                    inputmode="numeric"
+                                    placeholder="Masukkan 16 digit NIK"
+                                    required>
+
+                                @error('nik')
+                                <small class="text-danger">{{ $message }}</small>
+                                @enderror
+                            </div>
+
+                            <!-- Dusun -->
+                            <div class="mb-3">
+                                <label class="form-label">Asal Dusun</label>
+
+                                <select name="dusun"
+                                    class="form-select bg-dark text-white border-secondary"
+                                    required>
+
+                                    <option value="">-- Pilih Asal Dusun --</option>
+
+                                    @foreach($dusunList as $dusun)
+                                    <option value="{{ $dusun }}"
+                                        {{ old('dusun') == $dusun ? 'selected' : '' }}>
+                                        {{ $dusun }}
+                                    </option>
+                                    @endforeach
+
+                                </select>
+
+                                @error('dusun')
                                 <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
@@ -39,9 +85,12 @@
                             <!-- Email -->
                             <div class="mb-3">
                                 <label class="form-label">Email</label>
-                                <input type="email" name="email"
+
+                                <input type="email"
+                                    name="email"
                                     class="form-control bg-dark text-white border-secondary"
-                                    value="{{ old('email') }}" required>
+                                    value="{{ old('email') }}"
+                                    required>
 
                                 @error('email')
                                 <small class="text-danger">{{ $message }}</small>
@@ -51,19 +100,25 @@
                             <!-- Password -->
                             <div class="mb-3">
                                 <label class="form-label">Password</label>
-                                <input type="password" name="password"
-                                    class="form-control bg-dark text-white border-secondary" required>
+
+                                <input type="password"
+                                    name="password"
+                                    class="form-control bg-dark text-white border-secondary"
+                                    required>
 
                                 @error('password')
                                 <small class="text-danger">{{ $message }}</small>
                                 @enderror
                             </div>
 
-                            <!-- Confirm Password -->
+                            <!-- Konfirmasi Password -->
                             <div class="mb-3">
                                 <label class="form-label">Konfirmasi Password</label>
-                                <input type="password" name="password_confirmation"
-                                    class="form-control bg-dark text-white border-secondary" required>
+
+                                <input type="password"
+                                    name="password_confirmation"
+                                    class="form-control bg-dark text-white border-secondary"
+                                    required>
 
                                 @error('password_confirmation')
                                 <small class="text-danger">{{ $message }}</small>
@@ -72,7 +127,9 @@
 
                             <!-- Button -->
                             <div class="d-grid mb-3">
-                                <button class="btn btn-primary">Register</button>
+                                <button type="submit" class="btn btn-primary">
+                                    Register
+                                </button>
                             </div>
 
                         </form>

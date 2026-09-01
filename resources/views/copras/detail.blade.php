@@ -158,20 +158,106 @@
                         <th>Qi</th>
                         <th>Ui (%)</th>
                         <th>Ranking</th>
+                        <th>Status</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    @foreach($hasil as $i => $h)
-                    <tr class="{{ $i == 0 ? 'table-success fw-bold' : '' }}">
-                        <td class="text-start">{{ $h['nama'] }}</td>
-                        <td>{{ number_format($h['qi'], 4) }}</td>
-                        <td>{{ number_format($h['ui'], 2) }}%</td>
-                        <td>{{ $h['ranking'] }}</td>
-                    </tr>
-                    @endforeach
-                </tbody>
 
+                    @foreach($hasil as $h)
+
+                    <tr class="{{ $h['ranking'] <= 5 ? 'table-success' : '' }}">
+
+                        {{-- Alternatif --}}
+                        <td class="text-start fw-semibold">
+                            {{ $h['nama'] }}
+                        </td>
+
+                        {{-- Qi --}}
+                        <td>
+                            {{ number_format($h['qi'], 4) }}
+                        </td>
+
+                        {{-- Ui --}}
+                        <td>
+                            {{ number_format($h['ui'], 2) }}%
+                        </td>
+
+                        {{-- Ranking --}}
+                        <td>
+                            <strong>{{ $h['ranking'] }}</strong>
+                        </td>
+
+                        {{-- Status --}}
+                        <td>
+
+                            @if($h['status'] == 'Ditetapkan')
+
+                            <span class="badge bg-primary px-3 py-2">
+                                Ditetapkan
+                            </span>
+
+                            @elseif($h['ranking'] <= 5)
+
+                                <span class="badge bg-success px-3 py-2">
+                                Direkomendasikan
+                                </span>
+
+                                @elseif($h['ranking'] <= 10)
+
+                                    <span class="badge bg-warning text-dark px-3 py-2">
+                                    Dapat Dipertimbangkan
+                                    </span>
+
+                                    @else
+
+                                    <span class="badge bg-secondary px-3 py-2">
+                                        Tidak Direkomendasikan
+                                    </span>
+
+                                    @endif
+
+                        </td>
+
+                        {{-- Aksi --}}
+                        <td>
+
+                            @if($h['status'] == 'Ditetapkan')
+
+                            <span class="text-primary fw-semibold">
+                                <i class="bi bi-check-circle-fill"></i>
+                                Sudah Ditetapkan
+                            </span>
+
+                            @else
+
+                            <form
+                                action="{{ route('copras.tetapkan', $h['copras_id']) }}"
+                                method="POST"
+                                class="d-inline">
+
+                                @csrf
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary btn-sm"
+                                    onclick="return confirm('Tetapkan {{ $h['nama'] }} sebagai penerima bantuan?')">
+                                    <i class="bi bi-check-circle"></i>
+                                    Tetapkan
+                                </button>
+
+                            </form>
+
+                            @endif
+
+                        </td>
+
+                    </tr>
+
+                    @endforeach
+
+                </tbody>
             </table>
         </div>
 

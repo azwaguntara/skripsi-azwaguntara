@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Alternatif;
 use App\Models\KelompokAlternatif;
+use App\Models\Penilaian;
 
 class AlternatifController extends Controller
 {
@@ -55,7 +56,7 @@ class AlternatifController extends Controller
         );
     }
 
-    // EDIt
+    // EDIT
     public function edit($id)
     {
         $data = Alternatif::with('kelompok')
@@ -63,8 +64,6 @@ class AlternatifController extends Controller
 
         return view('alternatif.edit', compact('data'));
     }
-
-
 
     // UPDATE
     public function update(Request $r, $id)
@@ -88,16 +87,32 @@ class AlternatifController extends Controller
     }
 
     // HAPUS
-
     public function destroy(Request $r, $id)
     {
         $data = Alternatif::findOrFail($id);
 
+        // Cek apakah alternatif masih digunakan pada data penilaian
+        $digunakan = Penilaian::where(
+            'alternatif_id',
+            $data->id
+        )->exists();
+
+        if ($digunakan) {
+            return redirect()
+                ->route('alternatif.detail', $data->kelompok_id)
+                ->with(
+                    'error',
+                    'Alternatif tidak dapat dihapus karena masih digunakan pada data penilaian.'
+                );
+        }
+
         $data->delete();
 
-        return redirect()->route(
-            'alternatif.detail',
-            $r->kelompok_id
-        );
+        return redirect()
+            ->route('alternatif.detail', $data->kelompok_id)
+            ->with(
+                'success',
+                'Alternatif berhasil dihapus.'
+            );
     }
 }

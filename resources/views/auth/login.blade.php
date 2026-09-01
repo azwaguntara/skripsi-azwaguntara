@@ -17,7 +17,7 @@
         <div class="card shadow-lg border-0" style="width: 600px; border-radius: 15px;">
 
             <div class="card-body p-4 bg-dark text-white">
-                <h3 class="text-center ">Sistem Penentuan Penerima Bansos (BLT-DD) Desa Sei Bamban</h3>
+                <h3 class="text-center ">Sistem Pendukung Keputusan Penentuan Penerima Bansos Desa Sei Bamban</h3>
                 <h5 class="text-center mb-4">
                     <p class="text-secondary">
                         Bantuan Langsung Tunai Dana Desa
@@ -45,7 +45,7 @@
                     </div>
 
                     <!-- Password -->
-                    <div class="mb-3">
+                    <div class="mb-4">
                         <label class="form-label">Password</label>
                         <input type="password" name="password" class="form-control bg-secondary text-white border-0"
                             required>
@@ -54,26 +54,26 @@
                         @enderror
                     </div>
 
-                    <!-- Remember -->
-                    <div class="form-check mb-3">
+                 <!-- Remember -->
+{{--                    <div class="form-check mb-3">
                         <input type="checkbox" name="remember" class="form-check-input">
                         <label class="form-check-label">Remember me</label>
                     </div>
-
+--}}
                     <!-- Button -->
                     <div class="d-grid">
                         <button class="btn btn-primary">Login</button>
                     </div>
 
                     <!-- Forgot -->
-                    @if (Route::has('password.request'))
+{{--                    @if (Route::has('password.request'))
                     <div class="text-center mt-3">
                         <a href="{{ route('password.request') }}" class="text-decoration-none text-info">
                             Forgot password?
                         </a>
                     </div>
                     @endif
-
+--}}
                 </form>
 
                 @if (Route::has('register'))
@@ -88,7 +88,7 @@
                 <hr class="mt-4">
 
                 <div class="text-center footer">
-                    © 2026 SPK Bansos BLT-DD
+                    © 2026 SPK BLT-DD Desa Sei Bamban
                 </div>
             </div>
 

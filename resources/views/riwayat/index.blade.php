@@ -53,28 +53,33 @@
                 <table class="table table-bordered table-hover align-middle text-center">
 
                     <thead class="table-dark">
+
                         <tr>
                             <th>Ranking</th>
                             <th>Nama</th>
                             <th>Dusun</th>
                             <th>Nilai</th>
                             <th>Persentase</th>
+                            <th>Status</th>
                         </tr>
+
                     </thead>
 
                     <tbody>
+
                         @forelse($smart as $s)
-                        <tr class="{{ $s->ranking == 1 ? 'table-success fw-bold' : '' }}">
+
+                        <tr class="{{ $s['ranking'] <= 5 ? 'table-success' : '' }}">
+
+                        
 
                             <td>
-                                @if($s->ranking == 1) 1
-                                @elseif($s->ranking == 2) 2
-                                @elseif($s->ranking == 3) 3
-                                @else {{ $s->ranking }}
-                                @endif
+                                <strong>{{ $s->ranking }}</strong>
                             </td>
 
-                            <td class="text-start">{{ $s->alternatif->nama }}</td>
+                            <td class="text-start">
+                                {{ $s->alternatif->nama }}
+                            </td>
 
                             <td>
                                 {{ optional($s->alternatif->kelompok)->dusun }}
@@ -92,14 +97,43 @@
                                 </span>
                             </td>
 
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="3" class="text-muted">Tidak ada data</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
+                            <td>
 
+                                @if($s->ranking <= 5)
+
+                                    <span class="badge bg-success px-3 py-2">
+                                    Direkomendasikan
+                                    </span>
+
+                                    @elseif($s->ranking <= 10)
+
+                                        <span class="badge bg-warning text-dark px-3 py-2">
+                                        Dapat Dipertimbangkan
+                                        </span>
+
+                                        @else
+
+                                        <span class="badge bg-secondary px-3 py-2">
+                                            Tidak Direkomendasikan
+                                        </span>
+
+                                        @endif
+
+                            </td>
+
+                        </tr>
+
+                        @empty
+
+                        <tr>
+                            <td colspan="6" class="text-muted">
+                                Tidak ada data
+                            </td>
+                        </tr>
+
+                        @endforelse
+
+                    </tbody>
                 </table>
             </div>
 
@@ -116,34 +150,38 @@
                 <table class="table table-bordered table-hover align-middle text-center">
 
                     <thead class="table-dark">
+
                         <tr>
                             <th>Ranking</th>
                             <th>Nama</th>
                             <th>Dusun</th>
                             <th>Nilai</th>
                             <th>Persentase</th>
+                            <th>Status</th>
                         </tr>
+
                     </thead>
 
                     <tbody>
+
                         @php
                         $maxCopras = $copras->max('nilai');
                         @endphp
+
                         @forelse($copras as $c)
-                        <tr class="{{ $c->ranking == 1 ? 'table-success fw-bold' : '' }}">
+
+                        <tr class="{{ $c['ranking'] <= 5 ? 'table-success' : '' }}">
 
                             <td>
-                                @if($c->ranking == 1) 1
-                                @elseif($c->ranking == 2) 2
-                                @elseif($c->ranking == 3) 3
-                                @else {{ $c->ranking }}
-                                @endif
+                                <strong>{{ $c->ranking }}</strong>
                             </td>
 
-                            <td class="text-start">{{ $c->alternatif->nama }}</td>
+                            <td class="text-start">
+                                {{ $c->alternatif->nama }}
+                            </td>
 
                             <td>
-                                {{ optional($s->alternatif->kelompok)->dusun }}
+                                {{ optional($c->alternatif->kelompok)->dusun }}
                             </td>
 
                             <td>
@@ -152,25 +190,58 @@
                                 </span>
                             </td>
 
-
-
                             <td>
                                 <span class="badge bg-success">
-                                    {{ $maxCopras > 0
-                                                ? number_format(($c->nilai / $maxCopras) * 100, 2)
-                                                : '0.00'
-                                            }}%
+
+                                    {{
+                                        $maxCopras > 0
+                                            ? number_format(
+                                                ($c->nilai / $maxCopras) * 100,
+                                                2
+                                            )
+                                            : '0.00'
+                                    }}%
+
                                 </span>
                             </td>
 
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="3" class="text-muted">Tidak ada data</td>
-                        </tr>
-                        @endforelse
-                    </tbody>
+                            <td>
 
+                                @if($c->ranking <= 5)
+
+                                    <span class="badge bg-success px-3 py-2">
+                                    Direkomendasikan
+                                    </span>
+
+                                    @elseif($c->ranking <= 10)
+
+                                        <span class="badge bg-warning text-dark px-3 py-2">
+                                        Dapat Dipertimbangkan
+                                        </span>
+
+                                        @else
+
+                                        <span class="badge bg-secondary px-3 py-2">
+                                            Tidak Direkomendasikan
+                                        </span>
+
+                                        @endif
+
+                            </td>
+
+                        </tr>
+
+                        @empty
+
+                        <tr>
+                            <td colspan="6" class="text-muted">
+                                Tidak ada data
+                            </td>
+                        </tr>
+
+                        @endforelse
+
+                    </tbody>
                 </table>
             </div>
 

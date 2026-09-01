@@ -10,7 +10,8 @@ class Copras extends Model
         'alternatif_id',
         'kelompok_id',
         'nilai',
-        'ranking'
+        'ranking',
+        'status',
     ];
 
     protected $table = 'copras';

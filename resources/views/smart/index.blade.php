@@ -8,9 +8,9 @@
 
 @if(session('error'))
 
-    <div class="alert alert-danger">
-        {{ session('error') }}
-    </div>
+<div class="alert alert-danger">
+    {{ session('error') }}
+</div>
 
 @endif
 
@@ -23,9 +23,11 @@
             <thead class="table-dark text-center">
 
                 <tr>
-                    <th width="80">No</th>
+                    <th width="70">No</th>
                     <th>Nama Dusun</th>
-                    <th width="180">Tanggal</th>
+                    <th width="150">Tanggal</th>
+                    <th width="150">Status</th>
+                    <th width="180">Terakhir Diproses</th>
                     <th width="180">Aksi</th>
                 </tr>
 
@@ -35,32 +37,52 @@
 
                 @foreach($kelompoks as $item)
 
-                    <tr>
+                <tr>
 
-                        <td class="text-center">
-                            {{ $loop->iteration }}
-                        </td>
+                    <td class="text-center">
+                        {{ $loop->iteration }}
+                    </td>
 
-                        <td>
-                            {{ $item->dusun }}
-                        </td>
+                    <td>
+                        {{ $item->dusun }}
+                    </td>
 
-                        <td>
-                            {{ $item->tanggal }}
-                        </td>
+                    <td>
+                        {{ $item->tanggal }}
+                    </td>
 
-                        <td class="text-center">
+                    <td class="text-center">
+                        @if($item->smart_processed_at)
+                        <span class="badge bg-success">
+                            Sudah Diproses
+                        </span>
+                        @else
+                        <span class="badge bg-warning text-dark">
+                            Belum Diproses
+                        </span>
+                        @endif
+                    </td>
 
-                            <a href="{{ route('smart.show', $item->id) }}"
-                               class="btn btn-info btn-sm text-white">
+                    <td class="text-center">
+                        @if($item->smart_processed_at)
+                        {{ \Carbon\Carbon::parse($item->smart_processed_at)->format('d-m-Y H:i') }}
+                        @else
+                        -
+                        @endif
+                    </td>
 
-                                Hitung SMART
+                    <td class="text-center">
 
-                            </a>
+                        <a href="{{ route('smart.show', $item->id) }}"
+                            class="btn btn-info btn-sm text-white">
 
-                        </td>
+                            Hitung SMART
 
-                    </tr>
+                        </a>
+
+                    </td>
+
+                </tr>
 
                 @endforeach
 

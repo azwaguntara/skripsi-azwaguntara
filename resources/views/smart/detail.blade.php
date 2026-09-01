@@ -294,26 +294,95 @@
                             <th>Ranking</th>
                             <th>Alternatif</th>
                             <th>Nilai</th>
+                            <th>Status</th>
+                            <th>Aksi</th>
                         </tr>
 
                     </thead>
 
                     <tbody>
 
-                        @foreach($hasil as $index => $h)
+                        @foreach($hasil as $h)
 
-                        <tr class="{{ $index == 0 ? 'table-success fw-bold' : '' }}">
+                        <tr class="{{ $h['ranking'] <= 5 ? 'table-success' : '' }}">
 
+                            {{-- RANKING --}}
                             <td>
-                                {{ $h['ranking'] }}
+                                <strong>{{ $h['ranking'] }}</strong>
                             </td>
 
+                            {{-- ALTERNATIF --}}
                             <td>
-                                {{ $h['nama'] }}
+                                <strong>{{ $h['nama'] }}</strong>
                             </td>
 
+                            {{-- NILAI --}}
                             <td>
                                 {{ round($h['nilai'], 4) }}
+                            </td>
+
+                            {{-- STATUS --}}
+                            <td>
+
+                                @if($h['status'] == 'Ditetapkan')
+
+                                <span class="badge bg-primary px-3 py-2">
+                                    Ditetapkan
+                                </span>
+
+                                @elseif($h['ranking'] <= 5)
+
+                                    <span class="badge bg-success px-3 py-2">
+                                    Direkomendasikan
+                                    </span>
+
+                                    @elseif($h['ranking'] <= 10)
+
+                                        <span class="badge bg-warning text-dark px-3 py-2">
+                                        Dapat Dipertimbangkan
+                                        </span>
+
+                                        @else
+
+                                        <span class="badge bg-secondary px-3 py-2">
+                                            Tidak Direkomendasikan
+                                        </span>
+
+                                        @endif
+
+                            </td>
+
+                            {{-- AKSI --}}
+                            <td>
+
+                                @if($h['status'] == 'Ditetapkan')
+
+                                <span class="text-primary fw-semibold">
+                                    <i class="bi bi-check-circle-fill"></i>
+                                    Sudah Ditetapkan
+                                </span>
+
+                                @else
+
+                                <form
+                                    action="{{ route('smart.tetapkan', $h['smart_id']) }}"
+                                    method="POST"
+                                    class="d-inline">
+
+                                    @csrf
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary btn-sm"
+                                        onclick="return confirm('Tetapkan {{ $h['nama'] }} sebagai penerima bantuan?')">
+                                        <i class="bi bi-check-circle"></i>
+                                        Tetapkan
+                                    </button>
+
+                                </form>
+
+                                @endif
+
                             </td>
 
                         </tr>

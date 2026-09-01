@@ -3,6 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Perhitungan COPRAS - BLT-DD Desa Sei Bamban</title>
 
@@ -12,57 +13,183 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
+        @page {
+            size: A4 landscape;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
+            margin: 0;
             padding: 30px 40px;
-            font-size: 13px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11px;
             color: #000;
             background: #fff;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: 25px;
+        .container-fluid {
+            width: 100%;
+            padding: 0;
+            margin: 0;
         }
 
+        /* =========================
+   KOP SURAT
+========================= */
+
+        .kop-surat {
+            width: 100%;
+            margin-bottom: 12px;
+        }
+
+        .kop-wrapper {
+            width: 100%;
+            display: table;
+        }
+
+        .kop-logo {
+            display: table-cell;
+            width: 145px;
+            vertical-align: middle;
+            text-align: left;
+        }
+
+        .kop-logo img {
+            width: 125px;
+            height: auto;
+        }
+
+        .kop-text {
+            display: table-cell;
+            vertical-align: middle;
+            text-align: center;
+            padding-right: 125px;
+            font-family: "Times New Roman", serif;
+        }
+
+        .kop-text .pemerintah {
+            font-size: 27px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        .kop-text .kecamatan {
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        .kop-text .desa {
+            font-size: 40px;
+            font-weight: bold;
+            line-height: 1.05;
+            margin-top: 3px;
+        }
+
+        .kop-text .alamat {
+            font-size: 14px;
+            margin-top: 6px;
+            line-height: 1.2;
+        }
+
+        .garis-kop-1 {
+            border-top: 2px solid #000;
+            margin-top: 8px;
+        }
+
+        .garis-kop-2 {
+            border-top: 5px solid #000;
+            margin-top: 3px;
+        }
+
+        /* JUDUL */
+
+        .header {
+            text-align: center;
+            margin-top: 18px;
+            margin-bottom: 10px;
+        }
+
+        .header h3,
         .header h4 {
             font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 5px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
         }
 
         .header p {
             margin: 0;
-            font-size: 13px;
+            font-size: 11px;
         }
+
+        /* NOMOR SURAT */
+
+        .nomor-surat {
+            text-align: center;
+            font-size: 11px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        /* =========================
+       INFORMASI
+    ========================= */
 
         .info {
-            margin-bottom: 20px;
-            font-size: 13px;
+            margin-bottom: 16px;
+            font-size: 11px;
+            line-height: 1.5;
         }
 
+        /* =========================
+       JUDUL SECTION
+    ========================= */
+
         .section-title {
-            font-size: 15px;
+            font-size: 12px;
             font-weight: 700;
-            margin-bottom: 10px;
+            margin-bottom: 7px;
         }
+
+        /* =========================
+       TABEL
+    ========================= */
 
         table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
+            margin-bottom: 0;
         }
 
         th,
         td {
             border: 1px solid #000 !important;
-            padding: 7px 8px !important;
+            padding: 5px 6px !important;
             text-align: center;
             vertical-align: middle;
+            font-size: 10px;
+            line-height: 1.25;
+        }
+
+        thead {
+            display: table-header-group;
         }
 
         thead th {
-            font-weight: 700;
             background-color: #212529 !important;
             color: #fff !important;
+            font-weight: 700;
+        }
+
+        tbody tr {
+            page-break-inside: avoid;
         }
 
         .nama-alternatif {
@@ -70,86 +197,287 @@
             white-space: nowrap;
         }
 
+        /* =========================
+       BAGIAN TABEL
+    ========================= */
+
         .table-section {
-            margin-bottom: 30px;
+            margin-bottom: 18px;
+            page-break-inside: auto;
         }
 
+        /* =========================
+       TOMBOL
+    ========================= */
+
+        .print-button {
+            margin-bottom: 18px;
+        }
+
+        /* =========================
+       TANDA TANGAN
+    ========================= */
+
         .signature {
-            width: 280px;
+            width: 240px;
             margin-left: auto;
-            margin-top: 50px;
+            margin-top: 35px;
             text-align: center;
-            line-height: 1.5;
+            line-height: 1.4;
+            font-size: 10px;
         }
 
         .signature-space {
-            height: 80px;
+            height: 65px;
         }
 
         .signature-name {
             font-weight: 700;
             text-decoration: underline;
             text-transform: uppercase;
-            margin-bottom: 0;
+            margin: 0;
         }
 
-        .print-button {
-            margin-bottom: 25px;
-        }
+        /* =========================
+       PRINT / PDF
+    ========================= */
 
         @media print {
 
             @page {
-                size: landscape;
-                margin: 10mm;
+                size: A4 landscape;
+                margin: 12mm;
+            }
+
+            html,
+            body {
+                width: 100%;
+                margin: 0;
+                padding: 0;
             }
 
             body {
-                padding: 0;
-                font-size: 11px;
+                font-size: 10px;
             }
 
             .no-print {
                 display: none !important;
+                visibility: hidden !important;
             }
 
+            .header {
+                margin-bottom: 16px;
+            }
+
+            .header h3,
             .header h4 {
                 font-size: 16px;
             }
 
-            .header p,
+            .header p {
+                font-size: 10px;
+            }
+
             .info {
-                font-size: 11px;
+                font-size: 10px;
+                margin-bottom: 14px;
             }
 
             .section-title {
-                font-size: 13px;
+                font-size: 12px;
+                margin-bottom: 6px;
             }
 
             th,
             td {
-                padding: 5px 6px !important;
+                padding: 5px 5px !important;
+                font-size: 9.5px;
             }
 
             .table-section {
-                margin-bottom: 20px;
+                margin-bottom: 16px;
             }
 
             .signature {
-                margin-top: 30px;
-                font-size: 11px;
+                margin-top: 28px;
+                font-size: 10px;
             }
 
             .signature-space {
                 height: 60px;
             }
         }
+
+        @media screen and (max-width: 768px) {
+
+            body {
+                padding: 20px 16px;
+                font-size: 12px;
+            }
+
+            .container-fluid {
+                width: 100%;
+                padding: 0;
+                margin: 0;
+            }
+
+            .header {
+                margin-bottom: 20px;
+            }
+
+            .header h3,
+            .header h4 {
+                font-size: 17px;
+            }
+
+            .header p {
+                font-size: 11px;
+            }
+
+            .info {
+                margin-bottom: 18px;
+                font-size: 11px;
+                line-height: 1.6;
+            }
+
+            .print-button {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-bottom: 20px;
+            }
+
+            .print-button .btn {
+                font-size: 12px;
+                padding: 8px 14px;
+            }
+
+            .table-section {
+                width: 100%;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                margin-bottom: 25px;
+            }
+
+            table {
+                width: max-content;
+                min-width: 900px;
+                table-layout: auto;
+            }
+
+            th,
+            td {
+                padding: 7px 9px !important;
+                font-size: 11px;
+                white-space: nowrap;
+            }
+
+            .nama-alternatif {
+                min-width: 150px;
+            }
+
+            .section-title {
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+
+            .signature {
+                width: 240px;
+                margin-top: 35px;
+                font-size: 11px;
+            }
+        }
+
+        .qr-code {
+            margin: 10px auto 8px;
+            text-align: center;
+        }
+
+        .qr-code img {
+            width: 85px;
+            height: 85px;
+            display: block;
+            margin: 0 auto;
+        }
     </style>
 </head>
 
 <body>
+    @php
+    $bulanRomawi = [
+    1 => 'I',
+    2 => 'II',
+    3 => 'III',
+    4 => 'IV',
+    5 => 'V',
+    6 => 'VI',
+    7 => 'VII',
+    8 => 'VIII',
+    9 => 'IX',
+    10 => 'X',
+    11 => 'XI',
+    12 => 'XII'
+    ];
 
-    <!-- HEADER -->
+    $nomorUrut = str_pad($kelompok->id, 3, '0', STR_PAD_LEFT);
+
+    $nomorSurat = $nomorUrut
+    . '/BLT-DD/DSB/'
+    . $bulanRomawi[date('n')]
+    . '/'
+    . date('Y');
+    @endphp
+
+
+    <!-- KOP SURAT -->
+
+    <div class="kop-surat">
+
+        <div class="kop-wrapper">
+
+            <div class="kop-logo">
+
+                @if(!empty($isPdf))
+                <img src="{{ public_path('images/Logo.jpeg') }}"
+                    alt="Logo Desa Sei Bamban">
+                @else
+                <img src="{{ asset('images/Logo.jpeg') }}"
+                    alt="Logo Desa Sei Bamban">
+                @endif
+
+            </div>
+
+            <div class="kop-text">
+
+                <div class="pemerintah">
+                    PEMERINTAH KABUPATEN LANGKAT
+                </div>
+
+                <div class="kecamatan">
+                    KECAMATAN BATANG SERANGAN
+                </div>
+
+                <div class="desa">
+                    DESA SEI BAMBAN
+                </div>
+
+                <div class="alamat">
+                    Alamat : Jl. Besar Batang Serangan, Desa Sei Bamban,
+                    Kec. Batang Serangan Kode Pos 20883
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="garis-kop-1"></div>
+
+        <div class="garis-kop-2"></div>
+
+    </div>
+
+
+    <!-- JUDUL -->
 
     <div class="header">
 
@@ -161,9 +489,15 @@
             Alternatif Penerima Bantuan Langsung Tunai Dana Desa (BLT-DD)
         </p>
 
-        <p>
-            Desa Sei Bamban
-        </p>
+    </div>
+
+
+    <!-- NOMOR SURAT -->
+
+    <div class="nomor-surat">
+
+        <strong>Nomor Surat :</strong>
+        {{ $nomorSurat }}
 
     </div>
 
@@ -184,10 +518,10 @@
 
     </div>
 
-
     <!-- BUTTON PRINT -->
+    @if(empty($isPdf))
 
-    <div class="print-button no-print">
+    <div class="print-button no-print d-flex gap-2">
 
         <button onclick="window.print()" class="btn btn-danger">
 
@@ -196,8 +530,17 @@
 
         </button>
 
+        <a href="{{ route('copras.download', $kelompok->id) }}"
+            class="btn btn-success">
+
+            <i class="bi bi-file-earmark-pdf"></i>
+            Download PDF
+
+        </a>
+
     </div>
 
+    @endif
 
     <!-- TABEL PENILAIAN -->
 
@@ -218,7 +561,7 @@
                     </th>
 
                     <th>
-                        Alternatif
+                        Nama Alternatif
                     </th>
 
                     @foreach($kriterias as $k)
@@ -296,6 +639,10 @@
                         Utility (%)
                     </th>
 
+                    <th style="width: 180px;">
+                        Status
+                    </th>
+
                 </tr>
 
             </thead>
@@ -322,6 +669,24 @@
                         {{ number_format($item['ui'], 2, '.', '') }}%
                     </td>
 
+                    <td>
+
+                        @if($item['ranking'] <= 5)
+
+                            Direkomendasikan
+
+                            @elseif($item['ranking'] <=10)
+
+                            Dapat Dipertimbangkan
+
+                            @else
+
+                            Tidak Direkomendasikan
+
+                            @endif
+
+                            </td>
+
                 </tr>
 
                 @endforeach
@@ -345,11 +710,12 @@
             Disahkan oleh,
         </div>
 
-        <div>
-            Kepala Desa Sei Bamban
-        </div>
 
-        <div class="signature-space"></div>
+        <div class="qr-code">
+            <img
+                src="data:image/svg+xml;base64,{{ $qrCode }}"
+                alt="QR Code Verifikasi">
+        </div>
 
         <p class="signature-name">
             Rudi Ariyanto
@@ -360,16 +726,6 @@
         </div>
 
     </div>
-
-
-    <script>
-        window.onload = function() {
-
-            window.print();
-
-        };
-    </script>
-
 </body>
 
 </html>

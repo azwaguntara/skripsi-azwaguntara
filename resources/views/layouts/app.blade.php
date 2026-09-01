@@ -40,6 +40,11 @@
             background: #34495e;
         }
 
+        .sidebar a.active {
+            background-color: #2b5697;
+            color: white;
+        }
+
         /* CONTENT */
         .content {
             margin-left: 250px;
@@ -143,6 +148,37 @@
                 width: 100% !important;
             }
         }
+
+        .user-info {
+            padding: 14px 16px;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .user-info .user-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 17px;
+        }
+
+        .user-info .user-name {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+
+        .user-info .user-role {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 11px;
+            margin-top: 2px;
+        }
     </style>
 
 </head>
@@ -160,44 +196,84 @@
 
         <h4 class="text-white p-3">SPK Bansos</h4>
 
-        
-        <a href="{{route('dashboard')}}">
-            <i></i> Dashboard
+        <a href="{{ route('dashboard') }}"
+            class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
+            Dashboard
         </a>
 
         @if(auth()->user()->role == 'admin')
 
-            <a href="{{ route('kriteria.index') }}">
-                <i></i> Data Kriteria
-            </a>
+        <a href="{{ route('kriteria.index') }}"
+            class="{{ request()->routeIs('kriteria.*') ? 'active' : '' }}">
+            Data Kriteria
+        </a>
 
-            <a href="{{ route('alternatif.index') }}">
-                <i ></i> Data Alternatif
-            </a>
+        <a href="{{ route('alternatif.index') }}"
+            class="{{ request()->routeIs('alternatif.*') ? 'active' : '' }}">
+            Data Alternatif
+        </a>
 
-            <a href="{{ route('penilaian.index') }}">
-                <i></i> Penilaian
-            </a>
+        <a href="{{ route('penilaian.index') }}"
+            class="{{ request()->routeIs('penilaian.*') ? 'active' : '' }}">
+            Penilaian
+        </a>
 
-            <a href="{{ route('smart.index') }}">
-                <i></i> Perhitungan SMART
-            </a>
+        <a href="{{ route('smart.index') }}"
+            class="{{ request()->routeIs('smart.*') ? 'active' : '' }}">
+            Perhitungan SMART
+        </a>
 
-            <a href="{{ route('copras.index') }}">
-                <i></i> Perhitungan COPRAS
-            </a>
+        <a href="{{ route('copras.index') }}"
+            class="{{ request()->routeIs('copras.*') ? 'active' : '' }}">
+            Perhitungan COPRAS
+        </a>
 
         @endif
 
-        <a href="{{ route('riwayat') }}">
+        <a href="{{ route('penerima.index') }}"
+            class="nav-link {{ request()->routeIs('penerima.index') ? 'active' : '' }}">
+
+            <i class="bi bi-person-check me-2"></i>
+            Penerima Bantuan
+
+        </a>
+
+        <a href="{{ route('riwayat') }}"
+            class="{{ request()->is('riwayat*') ? 'active' : '' }}">
             Riwayat Perankingan
         </a>
 
-        <a href="{{ route('profile.edit') }}">
+        <a href="{{ route('users.index') }}"
+            class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
+            <i class="bi bi-people"></i> Manajemen User
+        </a>
+
+        <a href="{{ route('profile.edit') }}"
+            class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">
             <i class="bi bi-person"></i> Profil
         </a>
 
 
+
+        <div class="user-info">
+            <div class="d-flex align-items-center">
+
+                <div class="user-icon me-2">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+
+                <div>
+                    <div class="user-name">
+                        {{ Auth::user()->name }}
+                    </div>
+
+                    <div class="user-role">
+                        {{ ucfirst(Auth::user()->role ?? 'User') }}
+                    </div>
+                </div>
+
+            </div>
+        </div>
 
         <form method="POST" action="{{route('logout')}}" class="p-3">
             @csrf
@@ -221,7 +297,7 @@
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

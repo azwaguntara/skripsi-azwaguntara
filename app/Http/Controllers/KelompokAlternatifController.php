@@ -54,13 +54,24 @@ class KelompokAlternatifController extends Controller
     {
         $kelompok = KelompokAlternatif::findOrFail($id);
 
-        // hapus semua alternatif di dalam dusun
-        $kelompok->alternatifs()->delete();
+        // Cek apakah dusun masih memiliki alternatif
+        if ($kelompok->alternatifs()->exists()) {
+            return redirect()
+                ->route('alternatif.index')
+                ->with(
+                    'error',
+                    'Dusun tidak dapat dihapus karena masih memiliki data alternatif calon penerima.'
+                );
+        }
 
-        // hapus dusun
+        // Hapus dusun jika sudah tidak memiliki alternatif
         $kelompok->delete();
 
-        return redirect()->route('alternatif.index')
-            ->with('success', 'Data berhasil dihapus');
+        return redirect()
+            ->route('alternatif.index')
+            ->with(
+                'success',
+                'Data dusun berhasil dihapus.'
+            );
     }
 }

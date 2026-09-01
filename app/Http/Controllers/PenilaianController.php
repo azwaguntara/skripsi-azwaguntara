@@ -16,7 +16,35 @@ class PenilaianController extends Controller
     {
         $kelompoks = KelompokAlternatif::latest()->get();
 
-        return view('penilaian.index', compact('kelompoks'));
+        $progress = [];
+
+        foreach ($kelompoks as $kelompok) {
+
+            $alternatifIds = Alternatif::where(
+                'kelompok_id',
+                $kelompok->id
+            )->pluck('id');
+
+            $totalData = $alternatifIds->count() * Kriteria::count();
+
+            $totalTerisi = Penilaian::whereIn(
+                'alternatif_id',
+                $alternatifIds
+            )->count();
+
+            if ($totalData == 0 || $totalTerisi == 0) {
+                $progress[$kelompok->id] = 'belum';
+            } elseif ($totalTerisi < $totalData) {
+                $progress[$kelompok->id] = 'proses';
+            } else {
+                $progress[$kelompok->id] = 'selesai';
+            }
+        }
+
+        return view(
+            'penilaian.index',
+            compact('kelompoks', 'progress')
+        );
     }
 
     public function show($id)
@@ -31,6 +59,62 @@ class PenilaianController extends Controller
         // Ambil semua kriteria
         $kriterias = Kriteria::orderBy('id')->get();
 
+        $opsiPenilaian = [
+            'Sakit Kronis' => [
+                1 => 'Tidak memiliki penyakit kronis',
+                2 => 'Sering sakit tapi bukan kronis',
+                3 => 'Sakit kronis ringan',
+                4 => 'Sakit kronis dengan keterbatasan aktivitas',
+                5 => 'Sakit kronis berat membutuhkan perawatan rutin',
+            ],
+
+            'Lansia' => [
+                1 => 'Bukan Lansia (Kurang dari 45 tahun)',
+                2 => 'Pra-Lansia (Kurang dari 60 tahun)',
+                3 => 'Lansia Muda (60 tahun – 69 tahun)',
+                4 => 'Lansia Madya (70 tahun – 79 tahun)',
+                5 => 'Lansia Tua (80 tahun ke atas)',
+            ],
+
+            'Disabilitas' => [
+                1 => 'Tidak memiliki disabilitas',
+                2 => 'Disabilitas ringan yang tidak terlalu mempengaruhi aktivitas bekerja',
+                3 => 'Disabilitas sedang yang mempengaruhi kemampuan bekerja',
+                4 => 'Disabilitas berat permanen tetapi masih dapat melakukan aktivitas terbatas',
+                5 => 'Disabilitas berat permanen dan tidak produktif',
+            ],
+
+            'Jumlah Tanggungan' => [
+                1 => 'Tanggungan 1',
+                2 => 'Tanggungan 2',
+                3 => 'Tanggungan 3',
+                4 => 'Tanggungan 4',
+                5 => 'Tanggungan 5',
+                6 => 'Tanggungan 6',
+                7 => 'Tanggungan 7',
+                8 => 'Tanggungan 8',
+                9 => 'Tanggungan 9',
+                10 => 'Tanggungan 10',
+            ],
+
+            'Status' => [
+                1 => 'Janda/duda dengan penghasilan tanpa tanggungan',
+                2 => 'Janda/duda tanpa penghasilan dan tanpa tanggungan',
+                3 => 'Menikah dengan penghasilan tetap',
+                4 => 'Menikah dengan penghasilan tidak tetap',
+                5 => 'Kepala keluarga perempuan',
+                6 => 'Janda/duda dengan tanggungan tanpa penghasilan',
+            ],
+
+            'Kondisi Rumah' => [
+                1 => 'Tidak layak huni',
+                2 => 'Sangat sederhana',
+                3 => 'Mengontrak',
+                4 => 'Sederhana',
+                5 => 'Layak huni',
+            ],
+        ];
+
         // Ambil ID alternatif
         $alternatifIds = $alternatifs->pluck('id');
 
@@ -42,13 +126,23 @@ class PenilaianController extends Controller
                 return $item->alternatif_id . '-' . $item->kriteria_id;
             });
 
+        $totalData = $alternatifIds->count() * $kriterias->count();
+
+        $totalTerisi = $penilaians->count();
+
+        $penilaianLengkap = $totalData > 0 && $totalTerisi >= $totalData;
+
         return view(
             'penilaian.detail',
             compact(
                 'kelompok',
                 'alternatifs',
                 'kriterias',
-                'penilaians'
+                'penilaians',
+                'opsiPenilaian',
+                'totalData',
+                'totalTerisi',
+                'penilaianLengkap'
             )
         );
     }

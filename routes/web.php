@@ -11,6 +11,8 @@ use App\Http\Controllers\CoprasController;
 use App\Http\Controllers\RiwayatController;
 use App\Http\Controllers\KelompokAlternatifController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\PenerimaBantuanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -76,11 +78,23 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
 
+    Route::resource('users', UserController::class)
+        ->except(['show']);
+
+    Route::patch('/users/{user}/approve', [UserController::class, 'approve'])
+        ->name('users.approve');
+
+    Route::patch('/users/{user}/reject', [UserController::class, 'reject'])
+        ->name('users.reject');
+
+
     /*
     |--------------------------------------------------------------------------
     | DETAIL ALTERNATIF
     |--------------------------------------------------------------------------
     */
+
+
 
     Route::get(
         '/detail-alternatif/{id}',
@@ -156,8 +170,16 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/smart/{id}', [SmartController::class, 'show'])
         ->name('smart.show');
 
+    Route::post('/smart/{id}/tetapkan', [SmartController::class, 'tetapkan'])
+        ->name('smart.tetapkan');
+
     Route::get('/smart/print/{id}', [SmartController::class, 'print'])
         ->name('smart.print');
+
+    Route::get('/smart/download/{id}', [SmartController::class, 'downloadPdf'])
+        ->name('smart.download');
+
+
 
     /*
     |--------------------------------------------------------------------------
@@ -171,9 +193,35 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/copras/{id}', [CoprasController::class, 'show'])
         ->name('copras.show');
 
+    Route::post('/copras/{id}/tetapkan', [CoprasController::class, 'tetapkan'])
+        ->name('copras.tetapkan');
+
     Route::get('/copras/print/{id}', [CoprasController::class, 'print'])
         ->name('copras.print');
+
+    Route::get('/copras/download/{id}', [CoprasController::class, 'downloadPdf'])
+        ->name('copras.download');
+
+
+    Route::get('/penerima-bantuan', [PenerimaBantuanController::class, 'index'])
+        ->name('penerima.index');
+
+    Route::get('/penerima-bantuan/print', [PenerimaBantuanController::class, 'print'])
+        ->name('penerima.print');
+
+    Route::get('/penerima-bantuan/pdf', [PenerimaBantuanController::class, 'downloadPdf'])
+        ->name('penerima.pdf');
 });
+
+Route::get(
+    '/verifikasi/smart/{token}',
+    [SmartController::class, 'verify']
+)->name('smart.verify');
+
+Route::get(
+    '/verifikasi/copras/{token}',
+    [CoprasController::class, 'verify']
+)->name('copras.verify');
 
 /*
 |--------------------------------------------------------------------------

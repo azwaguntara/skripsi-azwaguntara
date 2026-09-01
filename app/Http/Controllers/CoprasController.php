@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-
+use Carbon\Carbon;
 use App\Models\Alternatif;
 use App\Models\Kriteria;
 use App\Models\Penilaian;
 use App\Models\Copras;
 use App\Models\KelompokAlternatif;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Str;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class CoprasController extends Controller
 {
@@ -187,17 +190,8 @@ class CoprasController extends Controller
 
         foreach ($alternatifs as $alt) {
 
-            // Jika penilaian belum lengkap,
-            // maka nilai Qi ditetapkan 0
-            if (!$alternatifLengkap[$alt->id]) {
-
-                $qiData[$alt->id] = 0;
-
-                continue;
-            }
-
-
             if ($sminus[$alt->id] != 0 && $sumInv != 0) {
+
                 $qi = $splus[$alt->id] +
                     (
                         $totalSminus /
@@ -206,6 +200,7 @@ class CoprasController extends Controller
                         )
                     );
             } else {
+
                 $qi = $splus[$alt->id];
             }
 
@@ -216,20 +211,8 @@ class CoprasController extends Controller
         // 8. NILAI Qi DAN Ui
         // ==========================================
 
-        // Qmax hanya diambil dari alternatif
-        // yang penilaiannya lengkap
-        $qiLengkap = [];
-
-        foreach ($qiData as $alternatifId => $qi) {
-
-            if ($alternatifLengkap[$alternatifId]) {
-
-                $qiLengkap[] = $qi;
-            }
-        }
-
-        $qmax = !empty($qiLengkap)
-            ? max($qiLengkap)
+        $qmax = !empty($qiData)
+            ? max($qiData)
             : 0;
 
         $hasil = [];
@@ -238,17 +221,9 @@ class CoprasController extends Controller
 
             $qi = $qiData[$alt->id];
 
-            // Jika penilaian tidak lengkap,
-            // Ui juga dibuat 0
-            if (!$alternatifLengkap[$alt->id]) {
-
-                $ui = 0;
-            } else {
-
-                $ui = $qmax == 0
-                    ? 0
-                    : ($qi / $qmax) * 100;
-            }
+            $ui = $qmax == 0
+                ? 0
+                : ($qi / $qmax) * 100;
 
             $hasil[] = [
                 'id' => $alt->id,
@@ -257,7 +232,6 @@ class CoprasController extends Controller
                 'ui' => $ui
             ];
         }
-
         // ==========================================
         // 9. URUTKAN RANKING
         // ==========================================
@@ -408,6 +382,48 @@ class CoprasController extends Controller
             }
         });
 
+
+        // Ambil ID dan status COPRAS
+        foreach ($hasil as $key => $item) {
+
+            $copras = Copras::where('alternatif_id', $item['id'])
+                ->where('kelompok_id', $id)
+                ->first();
+
+            $hasil[$key]['copras_id'] = $copras?->id;
+            $hasil[$key]['status'] = $copras?->status ?? 'Direkomendasikan';
+        }
+        // Cek waktu terakhir perubahan data penilaian ( Untuk update ket di hal index copras status)
+        $lastPenilaianUpdate = Penilaian::whereIn(
+            'alternatif_id',
+            $alternatifIds
+        )->max('updated_at');
+
+        $perluUpdateWaktu = false;
+
+        // Belum pernah diproses
+        if (is_null($kelompok->copras_processed_at)) {
+
+            $perluUpdateWaktu = true;
+        }
+
+        // Sudah pernah diproses dan ada perubahan penilaian
+        elseif (
+            $lastPenilaianUpdate &&
+            Carbon::parse($lastPenilaianUpdate)
+            ->gt(Carbon::parse($kelompok->copras_processed_at))
+        ) {
+
+            $perluUpdateWaktu = true;
+        }
+
+        // Update waktu hanya jika ada perubahan
+        if ($perluUpdateWaktu) {
+
+            $kelompok->copras_processed_at = now();
+            $kelompok->save();
+        }
+
         // ==========================================
         // 11. TAMPILKAN HASIL
         // ==========================================
@@ -428,9 +444,30 @@ class CoprasController extends Controller
         );
     }
 
+    public function tetapkan($id)
+    {
+        $copras = Copras::findOrFail($id);
+
+        $copras->update([
+            'status' => 'Ditetapkan',
+        ]);
+
+        return back()->with(
+            'success',
+            'Alternatif ' . $copras->alternatif->nama .
+                ' berhasil ditetapkan sebagai penerima.'
+        );
+    }
+
     public function print($id)
     {
         $kelompok = KelompokAlternatif::findOrFail($id);
+
+        // Buat token jika belum ada
+        if (empty($kelompok->verification_token)) {
+            $kelompok->verification_token = Str::uuid();
+            $kelompok->save();
+        }
 
         $alternatifs = Alternatif::where(
             'kelompok_id',
@@ -443,13 +480,6 @@ class CoprasController extends Controller
         // MATRIKS
         // ==========================================
 
-        /*
-        |--------------------------------------------------------------------------
-        | OPTIMASI:
-        | Ambil seluruh penilaian SEKALI.
-        |--------------------------------------------------------------------------
-        */
-
         $alternatifIds = $alternatifs->pluck('id');
 
         $penilaians = Penilaian::whereIn(
@@ -458,10 +488,9 @@ class CoprasController extends Controller
         )
             ->get()
             ->keyBy(function ($item) {
-
                 return $item->alternatif_id
-                    . '-' .
-                    $item->kriteria_id;
+                    . '-'
+                    . $item->kriteria_id;
             });
 
         $matrix = [];
@@ -484,48 +513,41 @@ class CoprasController extends Controller
         // HASIL COPRAS
         // ==========================================
 
-        /*
-        |--------------------------------------------------------------------------
-        | Eager loading alternatif supaya tidak terjadi
-        | query tambahan untuk setiap data.
-        |--------------------------------------------------------------------------
-        */
-
         $dataCopras = Copras::with('alternatif')
-            ->where(
-                'kelompok_id',
-                $id
-            )
+            ->where('kelompok_id', $id)
             ->orderBy('ranking')
             ->get();
 
-        // ==========================================
-        // QMAX
-        // ==========================================
-
         $qmax = $dataCopras->max('nilai');
-
-        // ==========================================
-        // RANKING
-        // ==========================================
 
         $ranking = $dataCopras->map(
             function ($item) use ($qmax) {
 
                 return [
-
                     'ranking' => $item->ranking,
-
                     'nama' => $item->alternatif->nama,
-
                     'qi' => $item->nilai,
-
                     'ui' => $qmax == 0
                         ? 0
                         : ($item->nilai / $qmax) * 100
-
                 ];
             }
+        );
+
+        // ==========================================
+        // QR CODE VERIFIKASI
+        // ==========================================
+
+        $verificationUrl = route(
+            'copras.verify',
+            $kelompok->verification_token
+        );
+
+        $qrCode = base64_encode(
+            QrCode::format('svg')
+                ->size(110)
+                ->margin(1)
+                ->generate($verificationUrl)
         );
 
         return view(
@@ -535,6 +557,161 @@ class CoprasController extends Controller
                 'alternatifs',
                 'kriterias',
                 'matrix',
+                'ranking',
+                'qrCode'
+            )
+        );
+    }
+
+    public function downloadPdf($id)
+    {
+        $kelompok = KelompokAlternatif::findOrFail($id);
+
+        // Buat token jika belum ada
+        if (empty($kelompok->verification_token)) {
+            $kelompok->verification_token = Str::uuid();
+            $kelompok->save();
+        }
+
+        $alternatifs = Alternatif::where(
+            'kelompok_id',
+            $id
+        )->get();
+
+        $kriterias = Kriteria::all();
+
+        // ==========================================
+        // MATRIKS
+        // ==========================================
+
+        $alternatifIds = $alternatifs->pluck('id');
+
+        $penilaians = Penilaian::whereIn(
+            'alternatif_id',
+            $alternatifIds
+        )
+            ->get()
+            ->keyBy(function ($item) {
+                return $item->alternatif_id
+                    . '-'
+                    . $item->kriteria_id;
+            });
+
+        $matrix = [];
+
+        foreach ($alternatifs as $alt) {
+
+            foreach ($kriterias as $k) {
+
+                $key = $alt->id . '-' . $k->id;
+
+                $data = $penilaians->get($key);
+
+                $matrix[$alt->id][$k->id] = $data
+                    ? $data->nilai
+                    : 0;
+            }
+        }
+
+        // ==========================================
+        // HASIL COPRAS
+        // ==========================================
+
+        $dataCopras = Copras::with('alternatif')
+            ->where('kelompok_id', $id)
+            ->orderBy('ranking')
+            ->get();
+
+        $qmax = $dataCopras->max('nilai');
+
+        $ranking = $dataCopras->map(
+            function ($item) use ($qmax) {
+
+                return [
+                    'ranking' => $item->ranking,
+                    'nama' => $item->alternatif->nama,
+                    'qi' => $item->nilai,
+                    'ui' => $qmax == 0
+                        ? 0
+                        : ($item->nilai / $qmax) * 100
+                ];
+            }
+        );
+
+        // ==========================================
+        // QR CODE VERIFIKASI
+        // ==========================================
+
+        $verificationUrl = route(
+            'copras.verify',
+            $kelompok->verification_token
+        );
+
+        $qrCode = base64_encode(
+            QrCode::format('svg')
+                ->size(110)
+                ->margin(1)
+                ->generate($verificationUrl)
+        );
+
+        // ==========================================
+        // GENERATE PDF
+        // ==========================================
+
+        $pdf = Pdf::loadView(
+            'copras.print',
+            compact(
+                'kelompok',
+                'alternatifs',
+                'kriterias',
+                'matrix',
+                'ranking',
+                'qrCode'
+            ) + [
+                'isPdf' => true
+            ]
+        )->setPaper('a4', 'landscape');
+
+        return $pdf->download(
+            'Perhitungan-COPRAS-' . $kelompok->dusun . '.pdf'
+        );
+    }
+
+    public function verify($token)
+    {
+        $kelompok = KelompokAlternatif::where(
+            'verification_token',
+            $token
+        )->firstOrFail();
+
+        $dataCopras = Copras::with('alternatif')
+            ->where(
+                'kelompok_id',
+                $kelompok->id
+            )
+            ->orderBy('ranking')
+            ->get();
+
+        $qmax = $dataCopras->max('nilai');
+
+        $ranking = $dataCopras->map(
+            function ($item) use ($qmax) {
+
+                return [
+                    'ranking' => $item->ranking,
+                    'nama' => $item->alternatif->nama,
+                    'qi' => $item->nilai,
+                    'ui' => $qmax == 0
+                        ? 0
+                        : ($item->nilai / $qmax) * 100
+                ];
+            }
+        );
+
+        return view(
+            'copras.verify',
+            compact(
+                'kelompok',
                 'ranking'
             )
         );

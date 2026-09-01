@@ -6,6 +6,30 @@
     Data Alternatif Calon Penerima Tiap Dusun
 </h4>
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle"></i>
+    {{ session('success') }}
+
+    <button type="button"
+        class="btn-close"
+        data-bs-dismiss="alert">
+    </button>
+</div>
+@endif
+
+@if(session('error'))
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-circle"></i>
+    {{ session('error') }}
+
+    <button type="button"
+        class="btn-close"
+        data-bs-dismiss="alert">
+    </button>
+</div>
+@endif
+
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
 
     <a href="{{ route('kelompok.create') }}" class="btn btn-primary">
@@ -51,13 +75,12 @@
 
                     <td class="text-center">
 
-                        
+
 
 
                         <a href="{{ route('alternatif.detail', $item->id) }}" class="btn btn-info btn-sm">
 
-                            <i class="bi bi-plus"></i>
-                            <span class="d-none d-md-inline">Calon Penerima</span>
+                            Calon Penerima
 
                         </a>
 
@@ -68,7 +91,7 @@
 
                             <button class="btn btn-danger btn-sm"
                                 onclick="return confirm('Yakin hapus data ini?')">
-                                <i class="bi bi-trash"></i>
+                                Hapus
                             </button>
 
                         </form>

@@ -14,10 +14,6 @@ class Kriteria extends Model
         'tipe',
     ];
 
-    protected $casts = [
-        'bobot' => 'decimal:2',
-    ];
-
     public function penilaians(): HasMany
     {
         return $this->hasMany(Penilaian::class);

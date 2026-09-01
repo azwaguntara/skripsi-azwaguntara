@@ -10,7 +10,8 @@ class Smart extends Model
         'alternatif_id',
         'kelompok_id',
         'nilai',
-        'ranking'
+        'ranking',
+        'status',
     ];
 
     protected $table = 'smarts';

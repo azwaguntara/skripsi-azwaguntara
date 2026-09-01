@@ -111,7 +111,7 @@
 
                             <td>
                                 <span class="badge bg-primary">
-                                    {{ $item->alternatifs_count }} Orang
+                                    {{ $item->alternatifs_count }} Keluarga
                                 </span>
                             </td>
                         </tr>
