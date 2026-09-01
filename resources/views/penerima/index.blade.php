@@ -59,14 +59,6 @@
                     <div class="col-md-auto ms-auto">
 
                         <a
-                            href="{{ route('penerima.print', ['kelompok_id' => $kelompokId]) }}"
-                            target="_blank"
-                            class="btn btn-outline-dark">
-                            <i class="bi bi-printer"></i>
-                            Cetak
-                        </a>
-
-                        <a
                             href="{{ route('penerima.pdf', ['kelompok_id' => $kelompokId]) }}"
                             class="btn btn-danger">
                             <i class="bi bi-file-earmark-pdf"></i>

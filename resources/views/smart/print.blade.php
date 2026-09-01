@@ -606,7 +606,6 @@
 
         </div>
 
-
         <!-- HASIL RANKING -->
 
         <div class="table-section">
@@ -629,12 +628,16 @@
                             Alternatif
                         </th>
 
-                        <th style="width: 180px;">
+                        <th style="width: 160px;">
                             Total Nilai
                         </th>
 
                         <th style="width: 180px;">
                             Status
+                        </th>
+
+                        <th style="width: 180px;">
+                            Tanggal Penetapan
                         </th>
 
                     </tr>
@@ -660,22 +663,16 @@
                         </td>
 
                         <td>
+                            {{ $item->status ?? 'Direkomendasikan' }}
+                        </td>
 
-                            @if($item->ranking <= 5)
-
-                                Direkomendasikan
-
-                                @elseif($item->ranking <= 10)
-
-                                    Dapat Dipertimbangkan
-
-                                    @else
-
-                                    Tidak Direkomendasikan
-
-                                    @endif
-
-                                    </td>
+                        <td>
+                            @if($item->status === 'Ditetapkan' && $item->tanggal_penetapan)
+                            {{ \Carbon\Carbon::parse($item->tanggal_penetapan)->format('d-m-Y H:i') }}
+                            @else
+                            -
+                            @endif
+                        </td>
 
                     </tr>
 
@@ -686,7 +683,6 @@
             </table>
 
         </div>
-
 
         <!-- TANDA TANGAN -->
 

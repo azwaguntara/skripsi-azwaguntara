@@ -173,6 +173,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::post('/smart/{id}/tetapkan', [SmartController::class, 'tetapkan'])
         ->name('smart.tetapkan');
 
+    Route::post('/smart/batal-tetapkan/{id}', [SmartController::class, 'batalTetapkan'])
+        ->name('smart.batalTetapkan');
+
     Route::get('/smart/print/{id}', [SmartController::class, 'print'])
         ->name('smart.print');
 
@@ -195,6 +198,9 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::post('/copras/{id}/tetapkan', [CoprasController::class, 'tetapkan'])
         ->name('copras.tetapkan');
+
+    Route::post('/copras/batal-tetapkan/{id}', [CoprasController::class, 'batalTetapkan'])
+        ->name('copras.batalTetapkan');
 
     Route::get('/copras/print/{id}', [CoprasController::class, 'print'])
         ->name('copras.print');
@@ -222,6 +228,9 @@ Route::get(
     '/verifikasi/copras/{token}',
     [CoprasController::class, 'verify']
 )->name('copras.verify');
+
+Route::get('/verifikasi-penerima/{kelompok_id?}', [PenerimaBantuanController::class, 'verifikasi'])
+    ->name('penerima.verifikasi');
 
 /*
 |--------------------------------------------------------------------------

@@ -620,7 +620,6 @@
         <table>
 
             <thead>
-
                 <tr>
 
                     <th style="width: 80px;">
@@ -643,8 +642,11 @@
                         Status
                     </th>
 
-                </tr>
+                    <th style="width: 180px;">
+                        Tanggal Penetapan
+                    </th>
 
+                </tr>
             </thead>
 
             <tbody>
@@ -670,29 +672,25 @@
                     </td>
 
                     <td>
+                        {{ $item['status'] ?? 'Direkomendasikan' }}
+                    </td>
 
-                        @if($item['ranking'] <= 5)
-
-                            Direkomendasikan
-
-                            @elseif($item['ranking'] <=10)
-
-                            Dapat Dipertimbangkan
-
-                            @else
-
-                            Tidak Direkomendasikan
-
-                            @endif
-
-                            </td>
+                    <td>
+                        @if(
+                        ($item['status'] ?? '') === 'Ditetapkan'
+                        && !empty($item['tanggal_penetapan'])
+                        )
+                        {{ \Carbon\Carbon::parse($item['tanggal_penetapan'])->format('d-m-Y H:i') }}
+                        @else
+                        -
+                        @endif
+                    </td>
 
                 </tr>
 
                 @endforeach
 
             </tbody>
-
         </table>
 
     </div>

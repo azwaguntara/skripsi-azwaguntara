@@ -392,7 +392,9 @@ class CoprasController extends Controller
 
             $hasil[$key]['copras_id'] = $copras?->id;
             $hasil[$key]['status'] = $copras?->status ?? 'Direkomendasikan';
+            $hasil[$key]['tanggal_penetapan'] = $copras?->tanggal_penetapan;
         }
+
         // Cek waktu terakhir perubahan data penilaian ( Untuk update ket di hal index copras status)
         $lastPenilaianUpdate = Penilaian::whereIn(
             'alternatif_id',
@@ -448,14 +450,29 @@ class CoprasController extends Controller
     {
         $copras = Copras::findOrFail($id);
 
-        $copras->update([
-            'status' => 'Ditetapkan',
-        ]);
+        $copras->status = 'Ditetapkan';
+        $copras->tanggal_penetapan = now();
+        $copras->save();
 
         return back()->with(
             'success',
             'Alternatif ' . $copras->alternatif->nama .
                 ' berhasil ditetapkan sebagai penerima.'
+        );
+    }
+
+    public function batalTetapkan($id)
+    {
+        $copras = Copras::findOrFail($id);
+
+        $copras->status = 'Direkomendasikan';
+        $copras->tanggal_penetapan = null;
+        $copras->save();
+
+        return back()->with(
+            'success',
+            'Penetapan ' . $copras->alternatif->nama .
+                ' berhasil dibatalkan.'
         );
     }
 
@@ -529,7 +546,9 @@ class CoprasController extends Controller
                     'qi' => $item->nilai,
                     'ui' => $qmax == 0
                         ? 0
-                        : ($item->nilai / $qmax) * 100
+                        : ($item->nilai / $qmax) * 100,
+                    'status' => $item->status ?? 'Direkomendasikan',
+                    'tanggal_penetapan' => $item->tanggal_penetapan,
                 ];
             }
         );
@@ -633,7 +652,9 @@ class CoprasController extends Controller
                     'qi' => $item->nilai,
                     'ui' => $qmax == 0
                         ? 0
-                        : ($item->nilai / $qmax) * 100
+                        : ($item->nilai / $qmax) * 100,
+                    'status' => $item->status ?? 'Direkomendasikan',
+                    'tanggal_penetapan' => $item->tanggal_penetapan,
                 ];
             }
         );

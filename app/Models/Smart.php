@@ -12,6 +12,7 @@ class Smart extends Model
         'nilai',
         'ranking',
         'status',
+        'tanggal_penetapan',
     ];
 
     protected $table = 'smarts';

@@ -7,6 +7,7 @@ use App\Models\Smart;
 use App\Models\Copras;
 use App\Models\KelompokAlternatif;
 use Barryvdh\DomPDF\Facade\Pdf;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PenerimaBantuanController extends Controller
 {
@@ -133,11 +134,42 @@ class PenerimaBantuanController extends Controller
             ? KelompokAlternatif::find($kelompokId)
             : null;
 
+        // ==========================
+        // LOGO
+        // ==========================
+        $logoPath = public_path('images/Logo.jpeg');
+
+        $logoBase64 = null;
+
+        if (file_exists($logoPath)) {
+            $logoBase64 = base64_encode(file_get_contents($logoPath));
+        }
+
+        // ==========================
+        // QR CODE
+        // ==========================
+        if ($kelompokId) {
+            $qrUrl = route('penerima.verifikasi', [
+                'kelompok_id' => $kelompokId
+            ]);
+        } else {
+            $qrUrl = route('penerima.verifikasi');
+        }
+
+        $qrCode = base64_encode(
+            QrCode::format('svg')
+                ->size(200)
+                ->margin(1)
+                ->generate($qrUrl)
+        );
+
         return view(
             'penerima.print',
             compact(
                 'penerima',
-                'kelompok'
+                'kelompok',
+                'logoBase64',
+                'qrCode'
             )
         );
     }
@@ -156,11 +188,41 @@ class PenerimaBantuanController extends Controller
             ? KelompokAlternatif::find($kelompokId)
             : null;
 
+        // ==========================
+        // LOGO
+        // ==========================
+        $logoPath = public_path('images/Logo.jpeg');
+
+        $logoBase64 = null;
+
+        if (file_exists($logoPath)) {
+            $logoBase64 = base64_encode(file_get_contents($logoPath));
+        }
+
+        // ==========================
+        // QR CODE
+        // ==========================
+        $qrUrl = route('penerima.verifikasi', [
+            'kelompok_id' => $kelompokId
+        ]);
+
+        $qrCode = base64_encode(
+            QrCode::format('svg')
+                ->size(200)
+                ->margin(1)
+                ->generate($qrUrl)
+        );
+
+        // ==========================
+        // PDF
+        // ==========================
         $pdf = Pdf::loadView(
             'penerima.print',
             compact(
                 'penerima',
-                'kelompok'
+                'kelompok',
+                'logoBase64',
+                'qrCode'
             )
         )->setPaper('a4', 'landscape');
 
@@ -173,5 +235,22 @@ class PenerimaBantuanController extends Controller
         $namaFile .= '.pdf';
 
         return $pdf->download($namaFile);
+    }
+
+    /**
+     * Halaman verifikasi dokumen penerima bantuan.
+     */
+    public function verifikasi($kelompok_id = null)
+    {
+        $kelompok = $kelompok_id
+            ? KelompokAlternatif::findOrFail($kelompok_id)
+            : null;
+
+        $penerima = $this->getPenerima($kelompok_id);
+
+        return view('penerima.verifikasi', compact(
+            'kelompok',
+            'penerima'
+        ));
     }
 }

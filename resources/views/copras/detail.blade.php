@@ -159,6 +159,7 @@
                         <th>Ui (%)</th>
                         <th>Ranking</th>
                         <th>Status</th>
+                        <th>Tanggal Penetapan</th>
                         <th>Aksi</th>
                     </tr>
                 </thead>
@@ -220,15 +221,38 @@
 
                         </td>
 
+                        {{-- Tanggal Penetapan --}}
+                        <td>
+                            @if($h['status'] == 'Ditetapkan' && !empty($h['tanggal_penetapan']))
+                            {{ \Carbon\Carbon::parse($h['tanggal_penetapan'])->format('d-m-Y H:i') }}
+                            @else
+                            -
+                            @endif
+                        </td>
+
                         {{-- Aksi --}}
                         <td>
 
                             @if($h['status'] == 'Ditetapkan')
 
-                            <span class="text-primary fw-semibold">
-                                <i class="bi bi-check-circle-fill"></i>
-                                Sudah Ditetapkan
-                            </span>
+                            <form
+                                action="{{ route('copras.batalTetapkan', $h['copras_id']) }}"
+                                method="POST"
+                                class="d-inline">
+
+                                @csrf
+
+                                <button
+                                    type="submit"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Batalkan penetapan {{ $h['nama'] }} sebagai penerima bantuan?')">
+
+                                    <i class="bi bi-x-circle"></i>
+                                    Batal Penetapan
+
+                                </button>
+
+                            </form>
 
                             @else
 
@@ -243,8 +267,10 @@
                                     type="submit"
                                     class="btn btn-primary btn-sm"
                                     onclick="return confirm('Tetapkan {{ $h['nama'] }} sebagai penerima bantuan?')">
+
                                     <i class="bi bi-check-circle"></i>
                                     Tetapkan
+
                                 </button>
 
                             </form>
@@ -252,7 +278,6 @@
                             @endif
 
                         </td>
-
                     </tr>
 
                     @endforeach

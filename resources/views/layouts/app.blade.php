@@ -27,6 +27,22 @@
             left: 0;
             transition: 0.3s;
             z-index: 1000;
+
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #526477;
+            border-radius: 10px;
+        }
+
+        .sidebar::-webkit-scrollbar-track {
+            background: #1f2d3d;
         }
 
         .sidebar a {

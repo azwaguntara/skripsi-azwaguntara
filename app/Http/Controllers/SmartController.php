@@ -444,6 +444,7 @@ class SmartController extends Controller
 
             $hasil[$key]['smart_id'] = $smart?->id;
             $hasil[$key]['status'] = $smart?->status ?? 'Direkomendasikan';
+            $hasil[$key]['tanggal_penetapan'] = $smart?->tanggal_penetapan;
         }
 
         // Cek waktu terakhir perubahan data penilaian
@@ -501,13 +502,27 @@ class SmartController extends Controller
     {
         $smart = Smart::findOrFail($id);
 
-        $smart->update([
-            'status' => 'Ditetapkan',
-        ]);
+        $smart->status = 'Ditetapkan';
+        $smart->tanggal_penetapan = now();
+        $smart->save();
 
         return back()->with(
             'success',
             'Alternatif ' . $smart->alternatif->nama . ' berhasil ditetapkan sebagai penerima.'
+        );
+    }
+
+    public function batalTetapkan($id)
+    {
+        $smart = Smart::findOrFail($id);
+
+        $smart->status = 'Direkomendasikan';
+        $smart->tanggal_penetapan = null;
+        $smart->save();
+
+        return back()->with(
+            'success',
+            'Penetapan ' . $smart->alternatif->nama . ' berhasil dibatalkan.'
         );
     }
 

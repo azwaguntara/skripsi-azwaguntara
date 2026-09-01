@@ -12,6 +12,7 @@ class Copras extends Model
         'nilai',
         'ranking',
         'status',
+        'tanggal_penetapan',
     ];
 
     protected $table = 'copras';
