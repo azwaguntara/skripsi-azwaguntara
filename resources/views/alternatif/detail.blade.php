@@ -34,9 +34,23 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
 
-    <a href="{{ route('alternatif.create', $kelompok->id) }}" class="btn btn-primary">
-        <i class="bi bi-plus"></i> Tambah Alternatif
-    </a>
+    <div class="d-flex gap-2 mb-3">
+
+        <a href="{{ route('alternatif.create', $kelompok->id) }}"
+            class="btn btn-primary">
+
+            <i class="bi bi-plus-lg"></i>
+            Tambah Alternatif
+
+        </a>
+
+        <a href="{{ route('alternatif.import.form', $kelompok->id) }}"
+            class="btn btn-success">
+            <i class="bi bi-file-earmark-excel"></i>
+            Import Excel
+        </a>
+
+    </div>
 
 </div>
 
@@ -48,7 +62,9 @@
             <thead class="table-dark text-center">
                 <tr>
                     <th>No</th>
+                    <th>NIK</th>
                     <th>Nama</th>
+                    <th>No. HP</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -62,29 +78,39 @@
                         {{ $loop->iteration }}
                     </td>
 
+                    <td class="text-center">
+                        {{ $item->nik ?? '-' }}
+                    </td>
+
                     <td>
                         {{ $item->nama }}
                     </td>
 
-
+                    <td class="text-center">
+                        {{ $item->no_hp ?? '-' }}
+                    </td>
 
                     <td class="text-center">
 
-                        <a href="{{ route('alternatif.edit', $item->id) }}" class="btn btn-warning btn-sm">
+                        <a href="{{ route('alternatif.edit', $item->id) }}"
+                            class="btn btn-warning btn-sm">
                             Edit
                         </a>
 
-                        <form action="{{ route('alternatif.destroy', $item->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('alternatif.destroy', $item->id) }}"
+                            method="POST"
+                            class="d-inline">
 
                             @csrf
                             @method('DELETE')
 
-                            <input type="hidden" name="kelompok_id" value="{{ $kelompok->id }}">
+                            <input type="hidden"
+                                name="kelompok_id"
+                                value="{{ $kelompok->id }}">
 
-                            <button class="btn btn-danger btn-sm" onclick="return confirm('Yakin hapus data ini?')">
-
+                            <button class="btn btn-danger btn-sm"
+                                onclick="return confirm('Yakin hapus data ini?')">
                                 Hapus
-
                             </button>
 
                         </form>
@@ -95,10 +121,8 @@
                 @empty
 
                 <tr>
-                    <td colspan="3" class="text-center text-muted">
-
+                    <td colspan="5" class="text-center text-muted">
                         Data alternatif belum tersedia
-
                     </td>
                 </tr>
 

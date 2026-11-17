@@ -494,7 +494,7 @@
 
                     Data penerima bantuan pada halaman ini
                     merupakan data yang telah ditetapkan
-                    melalui sistem pendukung keputusan
+                    melalui Sistem Pendukung Keputusan
                     Desa Sei Bamban.
 
                 </div>

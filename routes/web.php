@@ -53,6 +53,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/riwayat', [RiwayatController::class, 'index'])
         ->name('riwayat');
 
+    Route::get('/riwayat/download-pdf', [RiwayatController::class, 'downloadPdf'])
+        ->name('riwayat.downloadPdf');
+
     /*
     |--------------------------------------------------------------------------
     | PROFILE
@@ -142,11 +145,24 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         [KelompokAlternatifController::class, 'destroy']
     )->name('kelompok.destroy');
 
+    Route::get('/alternatif/import/{id}', [AlternatifController::class, 'importForm'])
+        ->name('alternatif.import.form');
+
+    Route::post('/alternatif/import/{id}', [AlternatifController::class, 'import'])
+        ->name('alternatif.import');
+
+
+
     /*
     |--------------------------------------------------------------------------
     | KRITERIA
     |--------------------------------------------------------------------------
     */
+    Route::get('/kriteria/import', [KriteriaController::class, 'importForm'])
+        ->name('kriteria.import.form');
+
+    Route::post('/kriteria/import', [KriteriaController::class, 'import'])
+        ->name('kriteria.import');
 
     Route::resource('kriteria', KriteriaController::class);
 
@@ -157,6 +173,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     */
 
     Route::resource('penilaian', PenilaianController::class);
+
+    Route::get('/penilaian/{id}/import', [PenilaianController::class, 'importForm'])
+        ->name('penilaian.import.form');
+
+    Route::post('/penilaian/{id}/import', [PenilaianController::class, 'import'])
+        ->name('penilaian.import');
 
     /*
     |--------------------------------------------------------------------------
@@ -207,17 +229,16 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 
     Route::get('/copras/download/{id}', [CoprasController::class, 'downloadPdf'])
         ->name('copras.download');
-
-
-    Route::get('/penerima-bantuan', [PenerimaBantuanController::class, 'index'])
-        ->name('penerima.index');
-
-    Route::get('/penerima-bantuan/print', [PenerimaBantuanController::class, 'print'])
-        ->name('penerima.print');
-
-    Route::get('/penerima-bantuan/pdf', [PenerimaBantuanController::class, 'downloadPdf'])
-        ->name('penerima.pdf');
 });
+
+Route::get('/penerima-bantuan', [PenerimaBantuanController::class, 'index'])
+    ->name('penerima.index');
+
+Route::get('/penerima-bantuan/print', [PenerimaBantuanController::class, 'print'])
+    ->name('penerima.print');
+
+Route::get('/penerima-bantuan/pdf', [PenerimaBantuanController::class, 'downloadPdf'])
+    ->name('penerima.pdf');
 
 Route::get(
     '/verifikasi/smart/{token}',
@@ -231,6 +252,8 @@ Route::get(
 
 Route::get('/verifikasi-penerima/{kelompok_id?}', [PenerimaBantuanController::class, 'verifikasi'])
     ->name('penerima.verifikasi');
+
+
 
 /*
 |--------------------------------------------------------------------------

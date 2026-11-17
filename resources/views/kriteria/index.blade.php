@@ -28,9 +28,19 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
 
-    <a href="{{ route('kriteria.create') }}" class="btn btn-primary">
-        <i class="bi bi-plus"></i> Tambah Kriteria
-    </a>
+    <div class="d-flex gap-2 flex-wrap">
+
+        <a href="{{ route('kriteria.create') }}" class="btn btn-primary">
+            <i class="bi bi-plus"></i>
+            Tambah Kriteria
+        </a>
+
+        <a href="{{ route('kriteria.import.form') }}" class="btn btn-success">
+            <i class="bi bi-file-earmark-excel"></i>
+            Import Excel
+        </a>
+
+    </div>
 
 </div>
 
@@ -47,6 +57,8 @@
                     <th>Nama Kriteria</th>
                     <th>Bobot</th>
                     <th>Tipe</th>
+                    <th>Ditambah Pada</th>
+                    <th>Diedit Pada</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -64,6 +76,13 @@
                         <span class="badge bg-{{ strtolower($item->tipe) == 'benefit' ? 'info' : 'danger' }}">
                             {{ ucfirst($item->tipe) }}
                         </span>
+                    </td>
+                    <td class="text-center">
+                        {{ $item->created_at ? $item->created_at->format('d/m/Y H:i') : '-' }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ $item->updated_at ? $item->updated_at->format('d/m/Y H:i') : '-' }}
                     </td>
                     <td class="text-center">
 
@@ -86,7 +105,7 @@
 
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center text-muted">
+                    <td colspan="8" class="text-center text-muted">
                         Data belum tersedia
                     </td>
                 </tr>

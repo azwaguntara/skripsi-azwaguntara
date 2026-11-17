@@ -50,7 +50,9 @@
                 <tr>
                     <th>No</th>
                     <th>Nama Dusun</th>
+                    
                     <th>Tanggal</th>
+                    <th>Jumlah Calon</th>
                     <th>Aksi</th>
                 </tr>
             </thead>
@@ -71,6 +73,10 @@
 
                     <td>
                         {{ $item->tanggal }}
+                    </td>
+
+                    <td class="text-center">
+                        {{ $item->alternatifs_count }} Orang
                     </td>
 
                     <td class="text-center">

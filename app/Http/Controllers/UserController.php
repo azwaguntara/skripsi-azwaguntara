@@ -168,7 +168,7 @@ class UserController extends Controller
 
         // Password hanya diubah jika diisi
         if (!empty($validated['password'])) {
-            $user->password = Hash::make($validated['password']);
+            $user->password = $validated['password'];
         }
 
         $user->save();

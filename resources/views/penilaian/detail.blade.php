@@ -6,6 +6,11 @@
     Matriks Penilaian - {{ $kelompok->dusun }}
 </h4>
 
+
+{{-- =========================================================
+     ALERT STATUS PENILAIAN
+     ========================================================= --}}
+
 @if($totalData == 0)
 
 <div class="alert alert-info">
@@ -36,9 +41,34 @@
 
 @endif
 
+
+{{-- =========================================================
+     TOMBOL IMPORT EXCEL
+     ========================================================= --}}
+
+<div class="d-flex justify-content-end mb-3">
+
+    <a href="{{ route('penilaian.import.form', $kelompok->id) }}"
+        class="btn btn-success">
+
+        <i class="bi bi-file-earmark-excel"></i>
+        Import Excel
+
+    </a>
+
+</div>
+
+
+{{-- =========================================================
+     TABEL PENILAIAN
+     ========================================================= --}}
+
 <div class="card p-3 mb-4">
 
-    <form method="POST" action="{{ route('penilaian.store') }}">
+    <form method="POST"
+        action="{{ route('penilaian.store') }}"
+        id="formPenilaian">
+
         @csrf
 
         <div class="table-responsive">
@@ -49,11 +79,13 @@
 
                     <tr>
 
-                        <th>Alternatif</th>
+                        <th style="min-width: 150px;">
+                            Alternatif
+                        </th>
 
                         @foreach($kriterias as $k)
 
-                        <th>
+                        <th style="min-width: 260px;">
                             {{ $k->nama }}
                         </th>
 
@@ -63,48 +95,60 @@
 
                 </thead>
 
+
                 <tbody>
 
                     @foreach($alternatifs as $a)
 
                     <tr>
 
+                        {{-- =================================================
+                                 NAMA ALTERNATIF
+                                 ================================================= --}}
+
                         <td class="fw-semibold">
                             {{ $a->nama }}
                         </td>
+
+
+                        {{-- =================================================
+                                 NILAI KRITERIA
+                                 ================================================= --}}
 
                         @foreach($kriterias as $k)
 
                         @php
 
-                        /*
-                        |--------------------------------------------------------------------------
-                        | Ambil nilai secara langsung berdasarkan
-                        | kombinasi alternatif + kriteria
-                        |--------------------------------------------------------------------------
-                        */
-
                         $key = $a->id . '-' . $k->id;
 
                         $nilai = $penilaians->get($key);
 
+                        $opsi = $opsiPenilaian[$k->nama] ?? [];
+
                         @endphp
 
-                        <td style="min-width: 250px;">
+
+                        <td style="min-width: 260px;">
 
                             <select
                                 name="nilai[{{ $a->id }}][{{ $k->id }}]"
-                                class="form-select">
+                                class="form-select nilai-input">
 
+                                {{-- PILIHAN DEFAULT --}}
                                 <option value="">
-                                    -- Pilih Penilaian --
+                                    -- Pilih {{ $k->nama }} --
                                 </option>
 
-                                @foreach($opsiPenilaian[$k->nama] ?? [] as $skor => $deskripsi)
 
-                                <option value="{{ $skor }}"
-                                    {{ $nilai !== null && $nilai->nilai == $skor ? 'selected' : '' }}>
-                                    {{ $deskripsi }}
+                                {{-- DAFTAR OPSI --}}
+                                @foreach($opsi as $value => $label)
+
+                                <option
+                                    value="{{ $value }}"
+                                    {{ $nilai && (int) $nilai->nilai === (int) $value ? 'selected' : '' }}>
+
+                                    {{ $value }} - {{ $label }}
+
                                 </option>
 
                                 @endforeach
@@ -125,6 +169,11 @@
 
         </div>
 
+
+        {{-- =========================================================
+             TOMBOL AKSI
+             ========================================================= --}}
+
         <div class="mt-3 d-flex justify-content-end gap-2">
 
             {{-- LANJUT NANTI --}}
@@ -133,8 +182,11 @@
                 value="lanjut"
                 class="btn btn-secondary">
 
-                <i class="bi bi-clock"></i> Lanjut Nanti
+                <i class="bi bi-clock"></i>
+                Lanjut Nanti
+
             </button>
+
 
             {{-- SELESAIKAN PENILAIAN --}}
             <button type="submit"
@@ -146,10 +198,10 @@
 
                 <i class="bi bi-check-circle"></i>
                 Selesaikan Penilaian
+
             </button>
 
         </div>
-
 
     </form>
 
@@ -157,40 +209,53 @@
 
 @endsection
 
+
+{{-- =============================================================
+     JAVASCRIPT CEK KELENGKAPAN
+     ============================================================= --}}
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
 
-        const selects = document.querySelectorAll(
+        const inputs = document.querySelectorAll(
             'select[name^="nilai["]'
         );
 
-        const btnSelesaikan = document.getElementById(
-            'btnSelesaikan'
-        );
+        const btnSelesaikan =
+            document.getElementById('btnSelesaikan');
+
 
         function cekKelengkapan() {
 
             let lengkap = true;
 
-            selects.forEach(function(select) {
+            inputs.forEach(function(input) {
 
-                if (select.value === '') {
+                if (input.value.trim() === '') {
+
                     lengkap = false;
+
                 }
 
             });
 
+
             btnSelesaikan.disabled = !lengkap;
+
         }
 
-        // Jalankan saat halaman pertama dibuka
+
+        // Cek ketika halaman pertama dibuka
         cekKelengkapan();
 
-        // Cek setiap kali dropdown berubah
-        selects.forEach(function(select) {
 
-            select.addEventListener('change', function() {
+        // Cek ketika dropdown berubah
+        inputs.forEach(function(input) {
+
+            input.addEventListener('change', function() {
+
                 cekKelengkapan();
+
             });
 
         });

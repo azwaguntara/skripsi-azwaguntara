@@ -16,10 +16,10 @@ class DashboardController extends Controller
         $dusun = KelompokAlternatif::count();
         $penilaian = Penilaian::count();
 
-        // ambil data dusun + jumlah alternatif
+        // Ambil data dusun + jumlah alternatif
         $dataDusun = KelompokAlternatif::withCount('alternatifs')
-                        ->latest()
-                        ->get();
+            ->orderBy('dusun')
+            ->get();
 
         return view('dashboard.index', compact(
             'alternatif',

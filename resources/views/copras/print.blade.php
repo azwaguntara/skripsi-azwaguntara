@@ -521,15 +521,17 @@
     <!-- BUTTON PRINT -->
     @if(empty($isPdf))
 
-    <div class="print-button no-print d-flex gap-2">
+{{--   <div class="print-button no-print d-flex gap-2">
 
         <button onclick="window.print()" class="btn btn-danger">
 
             <i class="bi bi-printer"></i>
             Cetak
 
-        </button>
+        </button> </div>
+--}} 
 
+        <div class="print-button no-print d-flex gap-2">
         <a href="{{ route('copras.download', $kelompok->id) }}"
             class="btn btn-success">
 
@@ -537,8 +539,9 @@
             Download PDF
 
         </a>
+        </div>
 
-    </div>
+    
 
     @endif
 

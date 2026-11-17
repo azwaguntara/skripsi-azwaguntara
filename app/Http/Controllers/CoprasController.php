@@ -547,7 +547,14 @@ class CoprasController extends Controller
                     'ui' => $qmax == 0
                         ? 0
                         : ($item->nilai / $qmax) * 100,
-                    'status' => $item->status ?? 'Direkomendasikan',
+                    'status' => $item->status
+                        ?? (
+                            $item->ranking <= 5
+                            ? 'Direkomendasikan'
+                            : ($item->ranking <= 10
+                                ? 'Dapat Dipertimbangkan'
+                                : 'Tidak Direkomendasikan')
+                        ),
                     'tanggal_penetapan' => $item->tanggal_penetapan,
                 ];
             }
@@ -653,7 +660,14 @@ class CoprasController extends Controller
                     'ui' => $qmax == 0
                         ? 0
                         : ($item->nilai / $qmax) * 100,
-                    'status' => $item->status ?? 'Direkomendasikan',
+                    'status' => $item->status
+                        ?? (
+                            $item->ranking <= 5
+                            ? 'Direkomendasikan'
+                            : ($item->ranking <= 10
+                                ? 'Dapat Dipertimbangkan'
+                                : 'Tidak Direkomendasikan')
+                        ),
                     'tanggal_penetapan' => $item->tanggal_penetapan,
                 ];
             }

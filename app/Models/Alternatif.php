@@ -10,7 +10,9 @@ class Alternatif extends Model
 {
     protected $fillable = [
         'kelompok_id',
+        'nik',
         'nama',
+        'no_hp',
     ];
 
     public function kelompok(): BelongsTo

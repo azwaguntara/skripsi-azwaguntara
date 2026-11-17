@@ -6,39 +6,61 @@
 
 <!-- FILTER -->
 <div class="card p-3 mb-4">
-    <form method="GET">
 
-        <div class="row g-3 align-items-end">
+    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
 
-            <div class="col-md-4">
+        <form method="GET" class="m-0">
 
-                <label class="form-label fw-semibold">
-                    Dusun
-                </label>
+            <div class="row g-3 align-items-end">
 
-                <select name="kelompok" class="form-select" onchange="this.form.submit()">
+                <div class="col-md-12">
 
-                    <option value="">
-                        -- Pilih Dusun --
-                    </option>
+                    <label class="form-label fw-semibold">
+                        Dusun
+                    </label>
 
-                    @foreach($listKelompok as $k)
+                    <select name="kelompok"
+                            class="form-select"
+                            onchange="this.form.submit()">
 
-                    <option value="{{ $k->id }}" {{ $kelompok == $k->id ? 'selected' : '' }}>
+                        <option value="">
+                            -- Pilih Dusun --
+                        </option>
 
-                        {{ $k->dusun }}
+                        @foreach($listKelompok as $k)
 
-                    </option>
+                            <option value="{{ $k->id }}"
+                                {{ $kelompok == $k->id ? 'selected' : '' }}>
 
-                    @endforeach
+                                {{ $k->dusun }}
 
-                </select>
+                            </option>
+
+                        @endforeach
+
+                    </select>
+
+                </div>
 
             </div>
 
-        </div>
+        </form>
 
-    </form>
+
+        @if($kelompok)
+
+            <a href="{{ route('riwayat.downloadPdf', ['kelompok' => $kelompok]) }}"
+               class="btn btn-danger">
+
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                Download PDF
+
+            </a>
+
+        @endif
+
+    </div>
+
 </div>
 
 <div class="row g-3">

@@ -195,6 +195,20 @@
             font-size: 11px;
             margin-top: 2px;
         }
+
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .table-responsive table {
+            min-width: 700px;
+        }
+        
+
+       
     </style>
 
 </head>
@@ -244,16 +258,6 @@
             Perhitungan COPRAS
         </a>
 
-        @endif
-
-        <a href="{{ route('penerima.index') }}"
-            class="nav-link {{ request()->routeIs('penerima.index') ? 'active' : '' }}">
-
-            <i class="bi bi-person-check me-2"></i>
-            Penerima Bantuan
-
-        </a>
-
         <a href="{{ route('riwayat') }}"
             class="{{ request()->is('riwayat*') ? 'active' : '' }}">
             Riwayat Perankingan
@@ -264,11 +268,20 @@
             <i class="bi bi-people"></i> Manajemen User
         </a>
 
+        @endif
+
+        <a href="{{ route('penerima.index') }}"
+            class="nav-link {{ request()->routeIs('penerima.index') ? 'active' : '' }}">
+
+            <i class="bi bi-person-check me-2"></i>
+            Penerima Bantuan
+
+        </a>
+
         <a href="{{ route('profile.edit') }}"
             class="{{ request()->routeIs('profile.*') ? 'active' : '' }}">
             <i class="bi bi-person"></i> Profil
         </a>
-
 
 
         <div class="user-info">

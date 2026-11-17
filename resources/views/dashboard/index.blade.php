@@ -55,8 +55,8 @@
             <div class="card border-0 shadow-sm rounded-4 p-3">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <p class="text-muted mb-1">Total Dusun</p>
-                        <h2 class="fw-bold">{{ 17 }}</h2>
+                        <p class="text-muted mb-1">Jumlah Dusun Yang Diajukan</p>
+                        <h2 class="fw-bold">{{ $dusun }} dari 17</h2>
                     </div>
 
                     <div class="bg-warning bg-opacity-10 p-3 rounded-circle">

@@ -541,6 +541,23 @@ class SmartController extends Controller
             ->orderBy('ranking')
             ->get();
 
+        $hasil->transform(function ($item) {
+
+            if ($item->status === 'Ditetapkan') {
+                return $item;
+            }
+
+            if ($item->ranking <= 5) {
+                $item->status = 'Direkomendasikan';
+            } elseif ($item->ranking <= 10) {
+                $item->status = 'Dapat Dipertimbangkan';
+            } else {
+                $item->status = 'Tidak Direkomendasikan';
+            }
+
+            return $item;
+        });
+
         $alternatifs = Alternatif::with('penilaians')
             ->where('kelompok_id', $id)
             ->get();
@@ -593,6 +610,23 @@ class SmartController extends Controller
             )
             ->orderBy('ranking')
             ->get();
+
+        $hasil->transform(function ($item) {
+
+            if ($item->status === 'Ditetapkan') {
+                return $item;
+            }
+
+            if ($item->ranking <= 5) {
+                $item->status = 'Direkomendasikan';
+            } elseif ($item->ranking <= 10) {
+                $item->status = 'Dapat Dipertimbangkan';
+            } else {
+                $item->status = 'Tidak Direkomendasikan';
+            }
+
+            return $item;
+        });
 
         $verificationUrl = route(
             'smart.verify',

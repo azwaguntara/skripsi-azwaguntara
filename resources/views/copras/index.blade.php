@@ -18,77 +18,94 @@
 
     <div class="card-body">
 
-        <table class="table table-bordered align-middle">
+        {{-- RESPONSIVE TABLE --}}
+        <div class="table-responsive">
 
-            <thead class="table-dark text-center">
+            <table class="table table-bordered align-middle mb-0">
 
-                <tr>
-                    <th width="70">No</th>
-                    <th>Nama Dusun</th>
-                    <th width="150">Tanggal</th>
-                    <th width="150">Status</th>
-                    <th width="180">Terakhir Diproses</th>
-                    <th width="180">Aksi</th>
-                </tr>
+                <thead class="table-dark text-center">
 
-            </thead>
+                    <tr>
+                        <th width="70">No</th>
+                        <th>Nama Dusun</th>
+                        <th width="150">Tanggal</th>
+                        <th width="150">Status</th>
+                        <th width="180">Terakhir Diproses</th>
+                        <th width="180">Aksi</th>
+                    </tr>
 
-            <tbody>
+                </thead>
 
-                @foreach($kelompoks as $item)
+                <tbody>
 
-                <tr>
+                    @foreach($kelompoks as $item)
 
-                    <td class="text-center">
-                        {{ $loop->iteration }}
-                    </td>
+                    <tr>
 
-                    <td>
-                        {{ $item->dusun }}
-                    </td>
+                        <td class="text-center">
+                            {{ $loop->iteration }}
+                        </td>
 
-                    <td>
-                        {{ $item->tanggal }}
-                    </td>
+                        <td>
+                            {{ $item->dusun }}
+                        </td>
 
-                    <td class="text-center">
-                        @if($item->copras_processed_at)
-                        <span class="badge bg-success">
-                            Sudah Diproses
-                        </span>
-                        @else
-                        <span class="badge bg-warning text-dark">
-                            Belum Diproses
-                        </span>
-                        @endif
-                    </td>
+                        <td>
+                            {{ $item->tanggal }}
+                        </td>
 
-                    <td class="text-center">
-                        @if($item->copras_processed_at)
-                        {{ \Carbon\Carbon::parse($item->copras_processed_at)->format('d-m-Y H:i') }}
-                        @else
-                        -
-                        @endif
-                    </td>
+                        <td class="text-center">
 
-                    <td class="text-center">
+                            @if($item->copras_processed_at)
 
-                        <a href="{{ route('copras.show', $item->id) }}"
-                            class="btn btn-info btn-sm text-white">
+                            <span class="badge bg-success">
+                                Sudah Diproses
+                            </span>
 
-                            Hitung COPRAS
+                            @else
 
-                        </a>
+                            <span class="badge bg-warning text-dark">
+                                Belum Diproses
+                            </span>
 
-                    </td>
+                            @endif
 
-                </tr>
+                        </td>
 
-                @endforeach
+                        <td class="text-center">
 
-            </tbody>
+                            @if($item->copras_processed_at)
 
-        </table>
+                            {{ \Carbon\Carbon::parse($item->copras_processed_at)->format('d-m-Y H:i') }}
+
+                            @else
+
+                            -
+
+                            @endif
+
+                        </td>
+
+                        <td class="text-center">
+
+                            <a href="{{ route('copras.show', $item->id) }}"
+                                class="btn btn-info btn-sm text-white">
+
+                                Hitung COPRAS
+
+                            </a>
+
+                        </td>
+
+                    </tr>
+
+                    @endforeach
+
+                </tbody>
+
+            </table>
+
+        </div>
 
     </div>
 

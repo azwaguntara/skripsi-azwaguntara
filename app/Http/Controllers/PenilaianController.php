@@ -9,6 +9,9 @@ use App\Models\Alternatif;
 use App\Models\Kriteria;
 use App\Models\Penilaian;
 use App\Models\KelompokAlternatif;
+use App\Imports\PenilaianImport;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 class PenilaianController extends Controller
 {
@@ -60,6 +63,19 @@ class PenilaianController extends Controller
         $kriterias = Kriteria::orderBy('id')->get();
 
         $opsiPenilaian = [
+            'Penghasilan' => [
+                1 => 'Kurang dari Rp. 300.000',
+                2 => 'Rp. 301.000 - Rp. 500.000',
+                3 => 'Rp. 501.000 - Rp. 900.000',
+                4 => 'Rp. 901.000 - Rp. 1.200.000',
+                5 => 'Rp. 1.201.000 - Rp. 1.500.000',
+                6 => 'Rp. 1.501.000 - Rp. 1.800.000',
+                7 => 'Rp. 1.801.000 - Rp. 2.100.000',
+                8 => 'Rp. 2.101.000 - Rp. 2.400.000',
+                9 => 'Rp. 2.401.000 - Rp. 2.700.000',
+                10 => 'Lebih dari Rp. 2.701.000',
+            ],
+
             'Sakit Kronis' => [
                 1 => 'Tidak memiliki penyakit kronis',
                 2 => 'Sering sakit tapi bukan kronis',
@@ -145,6 +161,51 @@ class PenilaianController extends Controller
                 'penilaianLengkap'
             )
         );
+    }
+
+    public function import(Request $request, $id)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:5120',
+        ]);
+
+        $kelompok = KelompokAlternatif::findOrFail($id);
+
+        try {
+
+            $import = new PenilaianImport($id);
+
+            Excel::import(
+                $import,
+                $request->file('file')
+            );
+
+            if (!empty($import->errors)) {
+
+                return redirect()
+                    ->route('penilaian.show', $id)
+                    ->with(
+                        'warning',
+                        'Import selesai dengan beberapa peringatan: ' .
+                            implode(' | ', $import->errors)
+                    );
+            }
+
+            return redirect()
+                ->route('penilaian.show', $id)
+                ->with(
+                    'success',
+                    'Data penilaian berhasil diimport dari Excel.'
+                );
+        } catch (\Throwable $e) {
+
+            return redirect()
+                ->route('penilaian.show', $id)
+                ->with(
+                    'error',
+                    'Import gagal: ' . $e->getMessage()
+                );
+        }
     }
 
     public function store(Request $r)
@@ -350,5 +411,17 @@ class PenilaianController extends Controller
                 'success',
                 'Penilaian berhasil disimpan.'
             );
+    }
+
+    public function importForm($id)
+    {
+        $kelompok = KelompokAlternatif::findOrFail($id);
+
+        $kriterias = Kriteria::orderBy('id')->get();
+
+        return view('penilaian.import', compact(
+            'kelompok',
+            'kriterias'
+        ));
     }
 }

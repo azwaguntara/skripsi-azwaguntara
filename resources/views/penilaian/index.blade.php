@@ -10,79 +10,78 @@
 
     <div class="card-body">
 
-        <table class="table table-bordered align-middle">
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle mb-0">
 
-            <thead class="table-dark text-center">
+                <thead class="table-dark text-center">
+                    <tr>
+                        <th width="80">No</th>
+                        <th width="180">Nama Dusun</th>
+                        <th>Tanggal</th>
+                        <th>Status</th>
+                        <th width="180">Aksi</th>
+                    </tr>
+                </thead>
 
-                <tr>
-                    <th width="80">No</th>
-                    <th>Nama Dusun</th>
-                    <th width="180">Tanggal</th>
-                    <th width="180">Status</th>
-                    <th width="180">Aksi</th>
-                </tr>
+                <tbody>
 
-            </thead>
+                    @foreach($kelompoks as $item)
 
-            <tbody>
+                    <tr>
 
-                @foreach($kelompoks as $item)
+                        <td class="text-center">
+                            {{ $loop->iteration }}
+                        </td>
 
-                <tr>
+                        <td>
+                            {{ $item->dusun }}
+                        </td>
 
-                    <td class="text-center">
-                        {{ $loop->iteration }}
-                    </td>
+                        <td>
+                            {{ $item->tanggal }}
+                        </td>
 
-                    <td>
-                        {{ $item->dusun }}
-                    </td>
+                        <td class="text-center">
 
-                    <td>
-                        {{ $item->tanggal }}
-                    </td>
+                            @if($progress[$item->id] === 'belum')
 
-                    <td class="text-center">
+                            <span class="badge bg-secondary">
+                                Belum Dimulai
+                            </span>
 
-                        @if($progress[$item->id] === 'belum')
+                            @elseif($progress[$item->id] === 'proses')
 
-                        <span class="badge bg-secondary">
-                            Belum Dimulai
-                        </span>
+                            <span class="badge bg-warning text-dark">
+                                Sedang Dikerjakan
+                            </span>
 
-                        @elseif($progress[$item->id] === 'proses')
+                            @else
 
-                        <span class="badge bg-warning text-dark">
-                            Sedang Dikerjakan
-                        </span>
+                            <span class="badge bg-success">
+                                Selesai
+                            </span>
 
-                        @else
+                            @endif
 
-                        <span class="badge bg-success">
-                            Selesai
-                        </span>
+                        </td>
 
-                        @endif
+                        <td class="text-center">
 
-                    </td>
+                            <a href="{{ route('penilaian.show', $item->id) }}"
+                                class="btn btn-info btn-sm text-white">
+                                Penilaian
+                            </a>
 
-                    <td class="text-center">
+                        </td>
 
-                        <a href="{{ route('penilaian.show', $item->id) }}" class="btn btn-info btn-sm text-white">
+                    </tr>
 
-                            Penilaian
+                    @endforeach
 
-                        </a>
+                </tbody>
 
-                    </td>
-
-                </tr>
-
-                @endforeach
-
-            </tbody>
-
-        </table>
+            </table>
+        </div>
 
     </div>
 
